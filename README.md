@@ -159,25 +159,6 @@ npm start
 | `src/commands/info/stats.ts` | Thêm Lavalink section |
 | `README.md` | Cập nhật documentation |
 
-#### 🚀 Git Commit
-```bash
-# Add all changes
-git add config.example.json src/types/index.ts src/services/MusicManager.ts src/commands/info/lavalink.ts src/commands/info/stats.ts README.md
-
-# Commit
-git commit -m "feat: add multi Lavalink nodes support with failover
-
-- Add support for multiple Lavalink nodes configuration
-- Add automatic failover when node disconnects  
-- Add /lavalink command to check nodes status
-- Update /stats command with Lavalink section
-- Add LavalinkNodeStatus interface for monitoring
-- Add getLavalinkNodesStatus() function
-- Reduce log spam (only show successful connections)"
-
-# Push
-git push origin main
-```
 
 ---
 
