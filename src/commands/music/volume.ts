@@ -77,8 +77,8 @@ async function setVolume(
         return { type: 'success' };
     }
 
-    if (isNaN(volume) || volume < 0 || volume > 100) {
-        const errorMsg = 'Này! Âm lượng chỉ được từ **0** đến **100** thôi! Đừng có làm khó tớ!';
+    if (isNaN(volume) || volume < 0 || volume > 200) {
+        const errorMsg = 'Này! Âm lượng chỉ được từ **0** đến **200** thôi! Đừng có làm khó tớ!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) {
             await interaction.reply({ embeds: [embedError], ephemeral: true });

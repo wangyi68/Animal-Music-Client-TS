@@ -79,7 +79,6 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     }
 
     const { customId } = interaction;
-    let updateNeeded = false;
 
     // Check if user is the song requester (optional - allow others to control)
     const currentTrack = player.queue.current;
@@ -107,28 +106,50 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
         case 'prev':
             const previousTracks = player.queue.previous;
             if (!previousTracks || previousTracks.length === 0) {
-                const embed = new EmbedBuilder().setDescription('> Hết đường lùi rồi! Đừng có cố nữa!').setColor(COLORS.ERROR);
-                await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+                const embedNoPrev = new EmbedBuilder()
+                    .setAuthor({ name: 'KHÔNG THỂ QUAY LẠI', iconURL: interaction.user.displayAvatarURL() })
+                    .setDescription('> Hết đường lùi rồi! Đừng có cố nữa!')
+                    .setColor(COLORS.ERROR)
+                    .setFooter({ text: 'Thôi nghe bài mới đi nha~' });
+                await interaction.reply({ embeds: [embedNoPrev], flags: MessageFlags.Ephemeral });
                 return;
             }
             const previousTrack = previousTracks.pop();
             if (previousTrack) {
                 player.queue.unshift(previousTrack);
                 player.skip();
-                await interaction.deferUpdate();
+                const embedPrev = new EmbedBuilder()
+                    .setAuthor({ name: 'QUAY LẠI BÀI TRƯỚC', iconURL: interaction.user.displayAvatarURL() })
+                    .setDescription(`> Đã quay lại bài **${previousTrack.title}** rồi đấy!`)
+                    .setColor(COLORS.MAIN)
+                    .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~' });
+                const msg = await interaction.reply({ embeds: [embedPrev], flags: MessageFlags.Ephemeral });
+                smartDelete(msg, DeletePresets.TRACK_ADDED);
             }
             return;
 
         case 'pause_resume':
             const isPaused = player.paused;
             player.pause(!isPaused);
-            updateNeeded = true;
-            break;
+            const embedPauseResume = new EmbedBuilder()
+                .setAuthor({ name: isPaused ? 'TIẾP TỤC PHÁT' : 'TẠM DỪNG', iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(isPaused ? '> Tiếp tục phát nhạc rồi đấy! Thích nghe quá nhỉ~' : '> Đã tạm dừng rồi nha! Nghỉ ngơi chút đi~')
+                .setColor(COLORS.MAIN)
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~' });
+            await interaction.reply({ embeds: [embedPauseResume], flags: MessageFlags.Ephemeral });
+            const loopModePause = getLoopMode(interaction.guildId!);
+            const componentsPause = createPlayerControlButtons(player, loopModePause);
+            await interaction.message.edit({ components: componentsPause }).catch(() => { });
+            return;
 
         case 'stop':
             await player.destroy();
             await interaction.message.delete().catch(() => { });
-            const embedStop = new EmbedBuilder().setDescription('Dừng rồi đấy! Vừa lòng chưa?').setColor(COLORS.MAIN);
+            const embedStop = new EmbedBuilder()
+                .setAuthor({ name: 'DỪNG PHÁT NHẠC', iconURL: interaction.user.displayAvatarURL() })
+                .setDescription('> Dừng rồi đấy! Vừa lòng chưa nào? Hẹn gặp lại nha~')
+                .setColor(COLORS.MAIN)
+                .setFooter({ text: 'Cảm ơn đã nghe nhạc cùng tớ~' });
             const channel = interaction.channel as TextChannel;
             if (channel) {
                 const msg = await channel.send({ embeds: [embedStop] });
@@ -137,26 +158,51 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
             return;
 
         case 'skip':
+            const currentTrackSkip = player.queue.current;
             player.skip();
-            await interaction.deferUpdate();
+            const embedSkip = new EmbedBuilder()
+                .setAuthor({ name: 'BỎ QUA BÀI', iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(currentTrackSkip ? `> Đã bỏ qua bài **${currentTrackSkip.title}** rồi nha!` : '> Đã bỏ qua bài hiện tại rồi!')
+                .setColor(COLORS.MAIN)
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~' });
+            const msgSkip = await interaction.reply({ embeds: [embedSkip], flags: MessageFlags.Ephemeral });
+            smartDelete(msgSkip, DeletePresets.TRACK_ADDED);
             return;
 
         case 'loop':
             const currentMode = getLoopMode(interaction.guildId!);
             const newMode = (currentMode + 1) % 3 as LoopMode;
             setLoopMode(interaction.guildId!, newMode, player);
-            updateNeeded = true;
-            break;
+            const loopModeNames = ['Tắt', 'Lặp bài', 'Lặp hàng chờ'];
+            const embedLoop = new EmbedBuilder()
+                .setAuthor({ name: `${newMode} CHẾ ĐỘ LẶP`, iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(`> Đã chuyển sang chế độ: **${loopModeNames[newMode]}** rồi nha!`)
+                .setColor(COLORS.MAIN)
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~' });
+            await interaction.reply({ embeds: [embedLoop], flags: MessageFlags.Ephemeral });
+            const loopModeUpdate = getLoopMode(interaction.guildId!);
+            const componentsLoop = createPlayerControlButtons(player, loopModeUpdate);
+            await interaction.message.edit({ components: componentsLoop }).catch(() => { });
+            return;
 
         case 'shuffle':
             player.queue.shuffle();
-            const embedShuffle = new EmbedBuilder().setDescription('Đã xáo trộn giúp rồi đấy! Rối tung lên cho xem!').setColor(COLORS.MAIN);
+            const embedShuffle = new EmbedBuilder()
+                .setAuthor({ name: `${player.queue.size} XÁO TRỘN HÀNG CHỜ`, iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(`> Đã xáo trộn **${player.queue.size}** bài trong hàng chờ rồi đấy! Rối tung lên cho xem!`)
+                .setColor(COLORS.MAIN)
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~' });
             await interaction.reply({ embeds: [embedShuffle], flags: MessageFlags.Ephemeral });
             return;
 
         case 'clear':
+            const queueSizeClear = player.queue.size;
             player.queue.clear();
-            const embedClear = new EmbedBuilder().setDescription('Dọn sạch sẽ rồi! Đừng có bày bừa ra nữa nha!').setColor(COLORS.MAIN);
+            const embedClear = new EmbedBuilder()
+                .setAuthor({ name: `${queueSizeClear} XÓA HÀNG CHỜ`, iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(`> Đã xóa **${queueSizeClear}** bài khỏi hàng chờ rồi! Dọn sạch sẽ rồi đấy! Đừng có bày bừa ra nữa nha!`)
+                .setColor(COLORS.MAIN)
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~' });
             await interaction.reply({ embeds: [embedClear], flags: MessageFlags.Ephemeral });
             return;
 
@@ -220,12 +266,6 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
         modal.addComponents(firstActionRow);
         await interaction.showModal(modal);
         return;
-    }
-
-    if (updateNeeded) {
-        const loopMode = getLoopMode(interaction.guildId!);
-        const components = createPlayerControlButtons(player, loopMode);
-        await interaction.update({ components: components });
     }
 }
 
