@@ -101,12 +101,13 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
             break;
 
         case 'stop':
-            player.destroy();
+            await player.destroy();
             await interaction.message.delete().catch(() => { });
-            const embedStop = new EmbedBuilder().setDescription(`${EMOJIS.STOP} Đã dừng nhạc.`).setColor(COLORS.MAIN);
+            const embedStop = new EmbedBuilder().setDescription('Đã dừng nhạc nè~').setColor(COLORS.MAIN);
             const channel = interaction.channel as TextChannel;
             if (channel) {
-                await channel.send({ embeds: [embedStop] });
+                await channel.send({ embeds: [embedStop] })
+                    .then((msg: any) => setTimeout(() => msg.delete().catch(() => { }), 10000));
             }
             return;
 
@@ -124,13 +125,13 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
 
         case 'shuffle':
             player.queue.shuffle();
-            const embedShuffle = new EmbedBuilder().setDescription('🔀 Đã xáo trộn hàng chờ.').setColor(COLORS.MAIN);
+            const embedShuffle = new EmbedBuilder().setDescription('Tớ đã xáo trộn lại danh sách bài hát giúp bạn rồi nè!').setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedShuffle], flags: MessageFlags.Ephemeral });
             return;
 
         case 'clear':
             player.queue.clear();
-            const embedClear = new EmbedBuilder().setDescription('🗑️ Đã xóa hàng chờ.').setColor(COLORS.MAIN);
+            const embedClear = new EmbedBuilder().setDescription('Tớ đã dọn dẹp danh sách chờ sạch bóng luôn rồi đó~').setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedClear], flags: MessageFlags.Ephemeral });
             return;
     }
@@ -138,12 +139,12 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     if (customId === 'search_btn') {
         const searchModal = new ModalBuilder()
             .setCustomId('search_modal')
-            .setTitle('Tìm kiếm / Nhập URL');
+            .setTitle('Gửi bản nhạc bạn yêu thích vào đây nè~');
         const searchInput = new TextInputBuilder()
             .setCustomId('search_input')
-            .setLabel('Tên bài hát hoặc URL')
+            .setLabel('Nói cho tớ yêu cầu của bạn nha')
             .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Nhập tên bài hoặc link YouTube...')
+            .setPlaceholder('Nhập tên bài hoặc link YouTube nè...')
             .setRequired(true);
         const searchRow = new ActionRowBuilder<TextInputBuilder>().addComponents(searchInput);
         searchModal.addComponents(searchRow);
@@ -216,13 +217,23 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promi
         if (!player.playing && !player.paused) player.play();
 
         const embed = new EmbedBuilder()
-            .setAuthor({ name: 'THÊM VÀO HÀNG CHỜ', iconURL: interaction.user.displayAvatarURL() })
             .setColor(COLORS.MAIN)
-            .setDescription(`Đã thêm **[${track.title}](${track.uri})** vào hàng chờ!`)
             .setThumbnail(track.thumbnail || null)
-            .setFooter({ text: '❤️ Âm nhạc đi trước tình yêu theo sau', iconURL: interaction.user.displayAvatarURL() });
+            .setAuthor({
+                name: 'ĐÃ THÊM VÀO HÀNG CHỜ',
+                iconURL: interaction.user.displayAvatarURL()
+            })
+            .setDescription(`**[${track.title}](${track.uri})**`)
+            .addFields(
+                { name: 'Tác giả', value: `\`${track.author}\``, inline: true },
+                { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true }
+            )
+            .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 
-        await interaction.editReply({ embeds: [embed], components: [] });
+        await interaction.editReply({ embeds: [embed], components: [] })
+            .then((msg: any) => {
+                setTimeout(() => msg.delete().catch(() => { }), 10000);
+            });
         return;
     }
 
@@ -236,7 +247,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
     if (interaction.customId === 'volume_modal') {
         if (!player) {
             const embed = new EmbedBuilder()
-                .setDescription(`${EMOJIS.ERROR} Không có nhạc đang phát.`)
+                .setDescription(`Không có nhạc đang phát.`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -247,7 +258,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (isNaN(volume) || volume < 0 || volume > 100) {
             const embed = new EmbedBuilder()
-                .setDescription(`${EMOJIS.ERROR} Vui lòng nhập số từ 0-100.`)
+                .setDescription(`Vui lòng nhập số từ 0-100.`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -255,7 +266,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         player.setVolume(volume);
         const embed = new EmbedBuilder()
-            .setDescription(`${EMOJIS.VOLUME} Đã đặt âm lượng: **${volume}%**`)
+            .setDescription(`Đã đặt âm lượng: **${volume}%**`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
@@ -266,7 +277,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (!player) {
             const embed = new EmbedBuilder()
-                .setDescription(`${EMOJIS.ERROR} Vui lòng dùng lệnh \`/play\` trước để tạo phiên nghe nhạc.`)
+                .setDescription(`Vui lòng dùng lệnh \`/play\` trước để tạo phiên nghe nhạc.`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -279,7 +290,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (!result.tracks.length) {
             const embed = new EmbedBuilder()
-                .setDescription(`${EMOJIS.ERROR} Không tìm thấy bài hát nào cho \`${query}\`.`)
+                .setDescription(`Không tìm thấy bài hát nào cho \`${query}\`.`)
                 .setColor(COLORS.ERROR);
             await interaction.editReply({ embeds: [embed] });
             return;
@@ -297,17 +308,30 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
             const embed = new EmbedBuilder()
                 .setColor(COLORS.MAIN)
                 .setThumbnail(track.thumbnail || null)
-                .setFooter({ text: '❤️ Âm nhạc đi trước tình yêu theo sau', iconURL: interaction.user.displayAvatarURL() });
+                .setAuthor({
+                    name: result.type === 'PLAYLIST' ? 'ĐÃ THÊM PLAYLIST NÈ~' : 'ĐÃ THÊM VÀO HÀNG CHỜ ĐÓ~',
+                    iconURL: interaction.user.displayAvatarURL()
+                })
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 
             if (result.type === 'PLAYLIST') {
-                embed.setAuthor({ name: 'THÊM PLAYLIST VÀO HÀNG CHỜ', iconURL: interaction.user.displayAvatarURL() });
-                embed.setDescription(`Đã thêm playlist **${result.playlistName}** (${result.tracks.length} bài) vào hàng chờ!`);
+                embed.setDescription(`Đã thêm playlist **${result.playlistName}** vào hàng chờ!`)
+                    .addFields(
+                        { name: 'Số lượng', value: `\`${result.tracks.length}\` bài hát`, inline: true },
+                        { name: 'Người thêm', value: `\`${interaction.user.username}\``, inline: true }
+                    );
             } else {
-                embed.setAuthor({ name: 'THÊM VÀO HÀNG CHỜ', iconURL: interaction.user.displayAvatarURL() });
-                embed.setDescription(`Đã thêm **[${track.title}](${track.uri})** vào hàng chờ!`);
+                embed.setDescription(`**[${track.title}](${track.uri})**`)
+                    .addFields(
+                        { name: 'Tác giả', value: `\`${track.author}\``, inline: true },
+                        { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true }
+                    );
             }
 
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] })
+                .then((msg: any) => {
+                    setTimeout(() => msg.delete().catch(() => { }), 10000);
+                });
         } else {
             const tracks = result.tracks.slice(0, 10);
             const options = tracks.map((track, index) =>
@@ -325,12 +349,15 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
             const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
             const embed = new EmbedBuilder()
-                .setAuthor({ name: 'KẾT QUẢ TÌM KIẾM', iconURL: interaction.user.displayAvatarURL() })
-                .setDescription(`${EMOJIS.SEARCH} Tìm thấy nhiều kết quả. Hãy chọn bên dưới:`)
+                .setAuthor({ name: 'KẾT QUẢ TÌM KIẾM NÈ~', iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(`Tìm thấy nhiều kết quả lắm luôn. Hãy chọn bên dưới nha:`)
                 .setColor(COLORS.MAIN)
-                .setFooter({ text: '❤️ Âm nhạc đi trước tình yêu theo sau', iconURL: interaction.user.displayAvatarURL() });
+                .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 
-            await interaction.editReply({ embeds: [embed], components: [row] });
+            await interaction.editReply({ embeds: [embed], components: [row] })
+                .then((msg: any) => {
+                    setTimeout(() => msg.delete().catch(() => { }), 30000); // Give user more time to select
+                });
         }
     }
 }

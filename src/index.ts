@@ -150,16 +150,14 @@ async function main(): Promise<void> {
     });
 
     // Event: Voice State Update
-    client.on(Events.VoiceStateUpdate, (oldState, newState) => {
+    client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
         if (oldState.member?.id === client.user?.id && !newState.channel) {
             const player = client.kazagumo.players.get(oldState.guild.id);
             if (player) {
-                // If player exists but looks destroyed or disconnecting, just null it out or handle softly
                 try {
-                    // Only destroy if not already destroyed (Kazagumo doesn't expose strict destroyed state easily, but try/catch is key)
-                    player.destroy();
+                    await player.destroy();
                 } catch (error) {
-                    // Suppress 'Player is already destroyed' error
+                    // Ignore already destroyed errors
                 }
             }
         }

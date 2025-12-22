@@ -78,7 +78,7 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
 
     if (!member?.voice?.channel) {
         const embed = new EmbedBuilder()
-            .setDescription(`${EMOJIS.ERROR} ❌ | Bạn đang không ở trong phòng Voice `)
+            .setDescription(`Huhu, bạn chưa vào phòng Voice kìa!`)
             .setColor(COLORS.ERROR);
         if (isInteraction) await context.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         else await context.reply({ embeds: [embed] });
@@ -110,7 +110,7 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
 
     if (!result.tracks.length) {
         const embed = new EmbedBuilder()
-            .setDescription(`${EMOJIS.ERROR} Không tìm thấy bài hát mà bạn muốn tìm.... thử lại? ❌`)
+            .setDescription(`**Không tìm thấy bài hát mà bạn muốn tìm. Vui lòng thử lại.**`)
             .setColor(COLORS.ERROR);
         if (isInteraction) await context.editReply({ embeds: [embed] });
         else await context.reply({ embeds: [embed] });
@@ -132,18 +132,33 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
         const embed = new EmbedBuilder()
             .setColor(COLORS.MAIN)
             .setThumbnail(track.thumbnail || null)
-            .setFooter({ text: '❤️ Âm nhạc đi trước tình yêu theo sau', iconURL: member.user.displayAvatarURL() });
+            .setAuthor({
+                name: result.type === 'PLAYLIST' ? 'ĐÃ THÊM PLAYLIST NÈ~' : 'ĐÃ THÊM VÀO HÀNG CHỜ ĐÓ~',
+                iconURL: member.user.displayAvatarURL()
+            })
+            .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: member.user.displayAvatarURL() });
 
         if (result.type === 'PLAYLIST') {
-            embed.setAuthor({ name: 'THÊM PLAYLIST VÀO HÀNG CHỜ', iconURL: member.user.displayAvatarURL() });
-            embed.setDescription(`Đã thêm playlist **${result.playlistName}** (${result.tracks.length} bài) vào hàng chờ!`);
+            embed.setDescription(`Tớ đã thêm cả một playlist **${result.playlistName}** vào hàng chờ rồi nha!`)
+                .addFields(
+                    { name: 'Số lượng', value: `\`${result.tracks.length}\` bài lận đó`, inline: true },
+                    { name: 'Người thêm', value: `\`${member.user.username}\``, inline: true }
+                );
         } else {
-            embed.setAuthor({ name: 'THÊM VÀO HÀNG CHỜ', iconURL: member.user.displayAvatarURL() });
-            embed.setDescription(`Đã thêm **[${track.title}](${track.uri})** vào hàng chờ!`);
+            embed.setDescription(`Bài hát **[${track.title}](${track.uri})** đã được nằm trong hàng chờ rồi nè~`)
+                .addFields(
+                    { name: 'Nghệ sĩ', value: `\`${track.author}\``, inline: true },
+                    { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true }
+                );
         }
 
-        if (isInteraction) await context.editReply({ embeds: [embed] });
-        else await context.reply({ embeds: [embed] });
+        if (isInteraction) {
+            await context.editReply({ embeds: [embed] })
+                .then((msg: any) => setTimeout(() => msg.delete().catch(() => { }), 10000));
+        } else {
+            await context.reply({ embeds: [embed] })
+                .then((msg: any) => setTimeout(() => msg.delete().catch(() => { }), 10000));
+        }
 
         return { type: 'success' };
     }
@@ -167,9 +182,9 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
 
     const embed = new EmbedBuilder()
         .setAuthor({ name: 'KẾT QUẢ TÌM KIẾM', iconURL: member.user.displayAvatarURL() })
-        .setDescription(`${EMOJIS.SEARCH} Tìm thấy **${tracks.length}** kết quả cho \`${query}\`. Vui lòng chọn bên dưới:`)
+        .setDescription(`Tìm thấy **${tracks.length}** kết quả cho \`${query}\`. Vui lòng chọn bên dưới:`)
         .setColor(COLORS.MAIN)
-        .setFooter({ text: '❤️ Âm nhạc đi trước tình yêu theo sau', iconURL: member.user.displayAvatarURL() });
+        .setFooter({ text: 'Âm nhạc đi trước tình yêu theo sau', iconURL: member.user.displayAvatarURL() });
 
     if (isInteraction) await context.editReply({ embeds: [embed], components: [row] });
     else await context.reply({ embeds: [embed], components: [row] });

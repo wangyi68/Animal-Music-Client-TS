@@ -39,8 +39,8 @@ async function skipTrack(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không tìm thấy bài hát mà bạn muốn tìm.... thử lại? ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Hiện tại không có nhạc đang phát.';
+        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         return { type: 'error', message: errorMsg };
     }

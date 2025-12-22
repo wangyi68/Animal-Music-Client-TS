@@ -57,12 +57,12 @@ async function showHelp(
                 iconURL: message?.author?.displayAvatarURL?.() || interaction?.user?.displayAvatarURL?.()
             })
             .setDescription(
-                `- Chào, mình là bot âm nhạc :3\n` +
+                `- Chào, mình là bot âm nhạc\n` +
                 `- Bot hỗ trợ cả **prefix** và **slash commands**!\n` +
                 `### Danh sách lệnh\n` +
                 `> Dùng \`${prefix}help <tên lệnh>\` để xem chi tiết.`
             )
-            .setFooter({ text: 'Music comes first, love follows 💖' })
+            .setFooter({ text: 'Music comes first, love follows' })
             .setColor(0xFFC0CB);
 
         commandMap.forEach((cmds, category) => {
@@ -91,7 +91,7 @@ async function showHelp(
 
     if (!cmd) {
         const errorMsg = `Không tìm thấy lệnh: ${commandName}`;
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         return { type: 'error', message: errorMsg };
     }
@@ -109,7 +109,7 @@ async function showHelp(
             { name: 'Voice Channel', value: cmd.config.voiceChannel ? 'Cần' : 'Không', inline: true },
             { name: 'Category', value: cmd.config.category, inline: true }
         )
-        .setFooter({ text: 'Hỗ trợ cả prefix và slash commands! 💖' })
+        .setFooter({ text: 'Hỗ trợ cả prefix và slash commands!' })
         .setColor(0xFFC0CB);
 
     if (message) {

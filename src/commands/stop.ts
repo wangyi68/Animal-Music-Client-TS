@@ -21,7 +21,7 @@ const command: Command = {
     async execute(context: CommandContext): Promise<CommandResult> {
         const { message } = context;
         const client = message.client as BotClient;
-        return await stopPlayer(client, message.guild!.id, message);
+        return await stopPlayer(client, message.guild!.id, message, null);
     },
 
     async executeSlash(context: SlashCommandContext): Promise<CommandResult> {
@@ -40,24 +40,33 @@ async function stopPlayer(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder()
+            .setDescription(`❌ **Hiện tại không có nhạc đang phát.**`)
+            .setColor(0xFF0000);
+
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        return { type: 'error', message: errorMsg };
+        else if (message) await message.reply({ embeds: [embedError] });
+
+        return { type: 'error', message: 'Không có nhạc đang phát' };
     }
 
-    player.destroy();
+    try {
+        await player.destroy();
+    } catch (e) {
+        // Ignore if already destroyed
+    }
     removePlayerData(guildId);
 
+    const user = message ? message.author : interaction.user;
     const embed = new EmbedBuilder()
-        .setDescription('Nhà ngươi đã cho ta ngừng hát 🤬')
-        .setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
+        .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
+        .setDescription('Tớ đã tắt nhạc và rời đi rồi nè, bạn nhớ tớ thì lại gọi nha~')
         .setColor(0xFF0000);
 
-    if (message) {
-        await message.reply({ embeds: [embed] });
-    } else if (interaction) {
+    if (interaction) {
         await interaction.reply({ embeds: [embed] });
+    } else if (message) {
+        await message.reply({ embeds: [embed] });
     }
 
     return { type: 'success' };

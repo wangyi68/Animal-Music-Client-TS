@@ -39,8 +39,8 @@ async function togglePause(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Hiện tại không có nhạc đang phát.';
+        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         return { type: 'error', message: errorMsg };
     }

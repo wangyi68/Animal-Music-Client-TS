@@ -98,7 +98,7 @@ function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: 
         data.lastMessageId = null;
     }
 
-    const embed = createCompactEmbed(track);
+    const embed = createCompactEmbed(track, client.user?.displayAvatarURL() || undefined);
 
     channel.send({ embeds: [embed], components: components })
         .then(msg => {
@@ -153,26 +153,37 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
     if (!channel) return;
 
     const embed = new EmbedBuilder()
-        .setDescription(`${EMOJIS.QUEUE_EMPTY} Queue finished.`)
+        .setDescription(`Danh sách phát kết thúc rồi nè, hẹn gặp lại bạn nha~`)
         .setColor(0xFFC0CB);
 
     channel.send({ embeds: [embed] }).catch(() => { });
 }
 
-function createCompactEmbed(track: KazagumoTrack): EmbedBuilder {
+function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string): EmbedBuilder {
     const minutes = Math.floor((track.length || 0) / 60000);
     const seconds = Math.floor(((track.length || 0) % 60000) / 1000);
     const duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    const authorName = track.requester ? (track.requester as any).username : 'Unknown';
+    const authorName = track.requester ? (track.requester as any).username : 'Không rõ';
 
     return new EmbedBuilder()
         .setColor(0xFFC0CB) // Pink Main Color
-        .setThumbnail(track.thumbnail || null)
-        .setAuthor({ name: `${track.title}`, iconURL: track.thumbnail || undefined })
-        .setTitle(`${EMOJIS.MUSIC} ${track.title}`)
+        .setAuthor({
+            name: `Giai điệu đang vang lên nè~`,
+            iconURL: botAvatarUrl
+        })
+        .setTitle(track.title)
         .setURL(track.uri || null)
-        .setDescription(`By **${track.author}** | ${EMOJIS.TIME} ${duration} | ${EMOJIS.USER} ${authorName}`)
-        .setFooter({ text: `Requested by ${authorName}` });
+        .setThumbnail(track.thumbnail || null)
+        .addFields(
+            { name: 'Nghệ sĩ', value: `\`${track.author}\``, inline: true },
+            { name: 'Thời gian', value: `\`${duration}\``, inline: true },
+            { name: 'Người yêu cầu', value: `\`${authorName}\``, inline: true }
+        )
+        .setFooter({
+            text: `Animal Music • Đang phát giúp bạn đó~`,
+            iconURL: botAvatarUrl
+        })
+        .setTimestamp();
 }
 
 // Player data management

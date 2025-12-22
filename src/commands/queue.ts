@@ -46,8 +46,8 @@ async function showQueue(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player || !player.queue.current) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Hiện tại không có nhạc đang phát.';
+        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         return { type: 'error', message: errorMsg };
     }
@@ -64,21 +64,21 @@ async function showQueue(
     const end = start + itemsPerPage;
     const pageTracks = tracks.slice(start, end);
 
-    let description = `:notes: **Đang phát:** [${current?.title || 'Unknown'}](${current?.uri || '#'})\n\n`;
+    let description = `Đang phát giúp bạn bài hát này nè:\n[${current?.title || 'Không rõ'}](${current?.uri || '#'})\n\n`;
 
     if (pageTracks.length > 0) {
-        description += '**Hàng chờ:**\n';
+        description += 'Hàng chờ mình đang giữ nè:\n';
         description += pageTracks
             .map((track, i) => `\`${start + i + 1}.\` [${track.title}](${track.uri})`)
             .join('\n');
     } else {
-        description += '*Không còn bài hát nào trong hàng chờ*';
+        description += '*Hàng chờ đang trống trơn rồi đó~*';
     }
 
     const embed = new EmbedBuilder()
-        .setAuthor({ name: 'DANH SÁCH HÀNG CHỜ' })
+        .setAuthor({ name: 'HÀNG CHỜ HIỆN TẠI NÈ~' })
         .setDescription(description)
-        .setFooter({ text: `Trang ${currentPage}/${maxPages} • ${tracks.length} bài hát` })
+        .setFooter({ text: `Trang ${currentPage}/${maxPages} • Có tổng cộng ${tracks.length} bài lận đó` })
         .setColor(0xFFC0CB);
 
     if (message) {

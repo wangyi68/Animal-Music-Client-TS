@@ -7,23 +7,23 @@ export const COLORS = {
 export const EMOJIS = {
     // General
     SUCCESS: '',
-    ERROR: '<a:error:1444000891807076374>',
+    ERROR: '',
     WARNING: '',
-    LOADING: '<a:Loading:1452376829062283478> ',
+    LOADING: '',
 
     // Icons
-    MUSIC: '',      // Icon for "Now Playing" or Song Title
-    SEARCH: '🔍',     // Icon for Search Results
-    TIME: '',       // Icon for Duration
-    USER: '',       // Icon for Requester/User
-    HEART: '❤️',      // Icon for Footer
-    QUEUE_EMPTY: '', // Icon for Queue Empty message
+    MUSIC: '',
+    SEARCH: '',
+    TIME: '',
+    USER: '',
+    HEART: '',
+    QUEUE_EMPTY: '',
 
-    // Player Controls (Status Text or Buttons)
+    // Player Controls
     PREV: '',
     NEXT: '',
     PLAY: '',
-    PAUSE: '', // Sticking to text-like representation or standard pause symbol
+    PAUSE: '',
     STOP: '',
     LOOP: '',
     SHUFFLE: '',

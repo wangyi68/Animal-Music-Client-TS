@@ -10,20 +10,20 @@ export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: Loo
     const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId('prev')
-            .setLabel('Previous')
+            .setLabel('Trước')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(!player.queue.previous.length),
         new ButtonBuilder()
             .setCustomId('pause_resume')
-            .setLabel(isPaused ? 'Resume' : 'Pause')
+            .setLabel(isPaused ? 'Tiếp tục' : 'Tạm dừng')
             .setStyle(isPaused ? ButtonStyle.Success : ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId('stop')
-            .setLabel('Stop')
+            .setLabel('Dừng')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId('skip')
-            .setLabel('Next')
+            .setLabel('Bỏ qua')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -34,10 +34,10 @@ export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: Loo
     if (EMOJIS.NEXT) (row1.components[3] as ButtonBuilder).setEmoji(EMOJIS.NEXT);
 
     // Calculate Loop Label/Style
-    let loopLabel = 'Loop: Off';
+    let loopLabel = 'Lặp: Tắt';
     let loopStyle = ButtonStyle.Secondary;
-    if (loopMode === LoopMode.TRACK) { loopLabel = 'Loop: Track'; loopStyle = ButtonStyle.Success; }
-    if (loopMode === LoopMode.QUEUE) { loopLabel = 'Loop: Queue'; loopStyle = ButtonStyle.Success; }
+    if (loopMode === LoopMode.TRACK) { loopLabel = 'Lặp: Bài'; loopStyle = ButtonStyle.Success; }
+    if (loopMode === LoopMode.QUEUE) { loopLabel = 'Lặp: Danh sách'; loopStyle = ButtonStyle.Success; }
 
     // Row 2: Mode Controls + Search
     const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -47,19 +47,19 @@ export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: Loo
             .setStyle(loopStyle),
         new ButtonBuilder()
             .setCustomId('shuffle')
-            .setLabel('Shuffle')
+            .setLabel('Trộn bài')
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('search_btn')
-            .setLabel('Search')
+            .setLabel('Tìm kiếm')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('volume_btn')
-            .setLabel(`Vol: ${player.volume}%`)
+            .setLabel(`Âm lượng: ${player.volume}%`)
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('clear')
-            .setLabel('Clear')
+            .setLabel('Dọn hàng chờ')
             .setStyle(ButtonStyle.Danger)
     );
 
