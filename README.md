@@ -1,4 +1,4 @@
-# Animal Music Client 🎵
+# Animal Music Client TS 🎵
 
 > Bot âm nhạc Discord với tính cách **Tsundere Cute** - dễ thương nhưng cũng hay dỗi!
 
@@ -78,8 +78,8 @@ src/
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/your-username/Animal-Music-Client.git
-cd Animal-Music-Client
+git clone https://github.com/wangyi68/Animal-Music-Client-TS.git
+cd Animal-Music-Client-TS
 ```
 
 ### 2. Cài đặt dependencies
