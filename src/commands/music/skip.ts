@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'skip',
@@ -39,9 +39,10 @@ async function skipTrack(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Hiện tại không có nhạc đang phát.';
-        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Hảả?! Làm gì có nhạc nào đang phát đâu mà skip!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
@@ -49,7 +50,7 @@ async function skipTrack(
     player.skip();
 
     const embed = new EmbedBuilder()
-        .setDescription(`Đã bỏ qua **${currentTrack?.title || 'bài hát'}**`)
+        .setDescription(`> Tớ đã bỏ qua **${currentTrack?.title || 'bài hát'}** rồi nha~`)
         .setColor(0xFFC0CB);
 
     if (message) {

@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'ping',
@@ -19,13 +19,13 @@ const command: Command = {
     async execute(context: CommandContext): Promise<CommandResult> {
         const { message } = context;
 
-        const embedPing = new EmbedBuilder().setDescription('🏓 Pinging...').setColor(0xFFC0CB);
+        const embedPing = new EmbedBuilder().setDescription('> Đang kiểm tra...').setColor(0xFFC0CB);
         const sent = await message.reply({ embeds: [embedPing] });
         const latency = sent.createdTimestamp - message.createdTimestamp;
         const apiLatency = Math.round(message.client.ws.ping);
 
         const embed = new EmbedBuilder()
-            .setTitle('🏓 Pong!')
+            .setTitle('Kết quả Ping')
             .addFields(
                 { name: 'Bot Latency', value: `${latency}ms`, inline: true },
                 { name: 'API Latency', value: `${apiLatency}ms`, inline: true }
@@ -39,13 +39,13 @@ const command: Command = {
     async executeSlash(context: SlashCommandContext): Promise<CommandResult> {
         const { interaction } = context;
 
-        const embedPing = new EmbedBuilder().setDescription('🏓 Pinging...').setColor(0xFFC0CB);
+        const embedPing = new EmbedBuilder().setDescription('> Đang kiểm tra...').setColor(0xFFC0CB);
         const sent = await interaction.reply({ embeds: [embedPing], fetchReply: true });
         const latency = sent.createdTimestamp - interaction.createdTimestamp;
         const apiLatency = Math.round(interaction.client.ws.ping);
 
         const embed = new EmbedBuilder()
-            .setTitle('🏓 Pong!')
+            .setTitle('Kết quả Ping')
             .addFields(
                 { name: 'Bot Latency', value: `${latency}ms`, inline: true },
                 { name: 'API Latency', value: `${apiLatency}ms`, inline: true }

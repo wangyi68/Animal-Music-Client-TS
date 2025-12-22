@@ -51,7 +51,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
 
     if (!player) {
         const embed = new EmbedBuilder()
-            .setDescription(`${EMOJIS.ERROR} Không có nhạc đang phát.`)
+            .setDescription(`> Đâu có nhạc nào đang phát đâu mà bấm nút!`)
             .setColor(COLORS.ERROR);
 
         if (interaction.message) {
@@ -78,11 +78,33 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     const { customId } = interaction;
     let updateNeeded = false;
 
+    // Check if user is the song requester (optional - allow others to control)
+    const currentTrack = player.queue.current;
+    const requester = currentTrack?.requester as any;
+    const isRequester = !requester || requester?.id === interaction.user.id;
+
+    // For certain actions, check if user is the requester or has permission
+    const restrictedActions = ['stop', 'clear_btn'];
+    if (restrictedActions.includes(customId) && !isRequester) {
+        const member = interaction.member as any;
+        const hasPermission = member?.permissions?.has?.('ManageGuild');
+
+        if (!hasPermission) {
+            const errorEmbed = new EmbedBuilder()
+                .setAuthor({ name: 'Hảả?! Mấy cái nút này không phải của bạn!' })
+                .setDescription(`> Bài hát này là yêu cầu của: ${requester?.toString?.() || 'Không rõ'}`)
+                .setColor(COLORS.ERROR);
+            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+            setTimeout(() => interaction.deleteReply().catch(() => { }), 10000);
+            return;
+        }
+    }
+
     switch (customId) {
         case 'prev':
             const previousTracks = player.queue.previous;
             if (!previousTracks || previousTracks.length === 0) {
-                const embed = new EmbedBuilder().setDescription('❌ Không có bài trước đó.').setColor(COLORS.ERROR);
+                const embed = new EmbedBuilder().setDescription('> Làm gì có bài trước đó đâu mà lùi!').setColor(COLORS.ERROR);
                 await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
@@ -233,7 +255,7 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promi
 
         const result = await client.kazagumo.search(uri, { requester: interaction.user });
         if (!result.tracks.length) {
-            embedFn.setDescription(`${EMOJIS.ERROR} Không thể phát bài hát này!`);
+            embedFn.setDescription(`> Không thể phát bài hát này rồi nè!`);
             embedFn.setColor(COLORS.ERROR);
             await interaction.followUp({ embeds: [embedFn], flags: MessageFlags.Ephemeral });
             return;
@@ -264,6 +286,22 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promi
         return;
     }
 
+    // Handle help menu selection
+    if (customId === 'help_menu') {
+        const { createCategoryEmbed } = await import('../commands/info/help.js');
+        const embeds = createCategoryEmbed(values, interaction.user, '/');
+
+        if (embeds.length > 0) {
+            await interaction.update({ embeds: embeds, components: [] });
+        } else {
+            const noCommandsEmbed = new EmbedBuilder()
+                .setDescription('> Không tìm thấy lệnh nào trong danh mục này nè.')
+                .setColor(COLORS.ERROR);
+            await interaction.update({ embeds: [noCommandsEmbed], components: [] });
+        }
+        return;
+    }
+
     await interaction.deferUpdate();
 }
 
@@ -274,7 +312,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
     if (interaction.customId === 'volume_modal') {
         if (!player) {
             const embed = new EmbedBuilder()
-                .setDescription(`Không có nhạc đang phát.`)
+                .setDescription(`> Chưa bật nhạc thì chỉnh volume làm gì!`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -285,7 +323,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (isNaN(volume) || volume < 0 || volume > 100) {
             const embed = new EmbedBuilder()
-                .setDescription(`Vui lòng nhập số từ 0-100.`)
+                .setDescription(`> Số phải từ **0** đến **100** thôi nha!`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -293,7 +331,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         player.setVolume(volume);
         const embed = new EmbedBuilder()
-            .setDescription(`Đã đặt âm lượng: **${volume}%**`)
+            .setDescription(`> Tớ đã đặt âm lượng thành **${volume}%** rồi nè~`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
@@ -304,7 +342,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (!player) {
             const embed = new EmbedBuilder()
-                .setDescription(`Vui lòng dùng lệnh \`/play\` trước để tạo phiên nghe nhạc.`)
+                .setDescription(`> Dùng lệnh \`/play\` trước đi rồi tớ mới tìm cho~`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -317,7 +355,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (!result.tracks.length) {
             const embed = new EmbedBuilder()
-                .setDescription(`Không tìm thấy bài hát nào cho \`${query}\`.`)
+                .setDescription(`> Không tìm thấy gì cho \`${query}\` hết trơn! Thử từ khóa khác đi~`)
                 .setColor(COLORS.ERROR);
             await interaction.editReply({ embeds: [embed] });
             return;
@@ -342,13 +380,13 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
                 .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 
             if (result.type === 'PLAYLIST') {
-                embed.setDescription(`Đã thêm playlist **${result.playlistName}** vào hàng chờ!`)
+                embed.setDescription(`> Tớ đã thêm playlist **${result.playlistName}** vào hàng chờ rồi nha!`)
                     .addFields(
                         { name: 'Số lượng', value: `\`${result.tracks.length}\` bài hát`, inline: true },
                         { name: 'Người thêm', value: `\`${interaction.user.username}\``, inline: true }
                     );
             } else {
-                embed.setDescription(`**[${track.title}](${track.uri})**`)
+                embed.setDescription(`> Bài **[${track.title}](${track.uri})** đã được thêm vào hàng chờ rồi nè~`)
                     .addFields(
                         { name: 'Tác giả', value: `\`${track.author}\``, inline: true },
                         { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true }
@@ -377,7 +415,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
             const embed = new EmbedBuilder()
                 .setAuthor({ name: 'KẾT QUẢ TÌM KIẾM NÈ~', iconURL: interaction.user.displayAvatarURL() })
-                .setDescription(`Tìm thấy nhiều kết quả lắm luôn. Hãy chọn bên dưới nha:`)
+                .setDescription(`> Tìm thấy nhiều kết quả lắm! Chọn bên dưới đi nha~`)
                 .setColor(COLORS.MAIN)
                 .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 

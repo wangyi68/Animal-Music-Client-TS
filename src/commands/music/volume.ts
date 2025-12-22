@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'volume',
@@ -49,15 +49,16 @@ async function setVolume(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Chỉnh volume cái gì khi chưa bật nhạc vậy?!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
     if (volume === undefined) {
         const embed = new EmbedBuilder()
-            .setDescription(`Âm lượng hiện tại: **${player.volume}%**`)
+            .setDescription(`> Âm lượng hiện tại: **${player.volume}%**`)
             .setColor(0xFFC0CB);
 
         if (message) await message.reply({ embeds: [embed] });
@@ -66,16 +67,17 @@ async function setVolume(
     }
 
     if (isNaN(volume) || volume < 0 || volume > 100) {
-        const errorMsg = 'Âm lượng phải từ 0 đến 100!';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Âm lượng phải từ **0** đến **100** nha!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
     player.setVolume(volume);
 
     const embed = new EmbedBuilder()
-        .setDescription(`Đã đặt âm lượng thành **${volume}%**`)
+        .setDescription(`> Tớ đã đặt âm lượng thành **${volume}%** rồi nè!`)
         .setColor(0xFFC0CB);
 
     if (message) {

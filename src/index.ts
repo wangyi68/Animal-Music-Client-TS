@@ -88,17 +88,17 @@ async function main(): Promise<void> {
         // Rotating Presence
         const activities = [
             {
-                name: 'Youtube 🎧',
+                name: 'Youtube',
                 type: ActivityType.Streaming,
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             },
             {
-                name: 'Spotify 🎧',
+                name: 'Spotify',
                 type: ActivityType.Streaming,
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             },
             {
-                name: 'SoundCloud 🎧',
+                name: 'SoundCloud',
                 type: ActivityType.Streaming,
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             },

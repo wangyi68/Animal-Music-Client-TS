@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'queue',
@@ -46,9 +46,10 @@ async function showQueue(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player || !player.queue.current) {
-        const errorMsg = 'Hiện tại không có nhạc đang phát.';
-        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Làm gì có nhạc nào đang phát đâu mà xem! Bật nhạc đi rồi tớ mới show cho~';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 

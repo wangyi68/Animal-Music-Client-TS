@@ -1,7 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import { removePlayerData } from '../services/MusicManager.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import { removePlayerData } from '../../services/MusicManager.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'stop',
@@ -41,7 +41,7 @@ async function stopPlayer(
 
     if (!player) {
         const embedError = new EmbedBuilder()
-            .setDescription(`❌ **Hiện tại không có nhạc đang phát.**`)
+            .setDescription(`> Dừng cái gì?! Đâu có gì đang phát đâu mà dừng!`)
             .setColor(0xFF0000);
 
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });

@@ -7,10 +7,10 @@ import {
     MessageFlags,
     AutocompleteInteraction
 } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
-import { COLORS, EMOJIS } from '../utils/constants.js';
-import { setPlayerData } from '../services/MusicManager.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { COLORS, EMOJIS } from '../../utils/constants.js';
+import { setPlayerData } from '../../services/MusicManager.js';
 
 export default {
     name: 'play',
@@ -139,20 +139,20 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
             .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: member.user.displayAvatarURL() });
 
         if (result.type === 'PLAYLIST') {
-            embed.setDescription(`Tớ đã thêm cả một playlist **${result.playlistName}** vào hàng chờ rồi nha!`)
+            embed.setDescription(`> Tớ đã thêm cả playlist **${result.playlistName}** vào hàng chờ rồi nha!`)
                 .addFields(
-                    { name: 'Số lượng', value: `\`${result.tracks.length}\` bài lận đó`, inline: true },
-                    { name: 'Người thêm', value: `\`${member.user.username}\``, inline: true }
+                    { name: '<a:li:1444329999971651787>  Số lượng', value: `\`${result.tracks.length}\` bài`, inline: true },
+                    { name: '<:guranote:1444001458600022179> Người thêm', value: `\`${member.user.username}\``, inline: true }
                 );
         } else {
             const position = player.queue.size;
             const positionText = position === 0 ? 'Đang phát ngay!' : `Vị trí #${position}`;
 
-            embed.setDescription(`Bài hát **[${track.title}](${track.uri})** đã được nằm trong hàng chờ rồi nè~`)
+            embed.setDescription(`> Bài **[${track.title}](${track.uri})** đã được thêm vào hàng chờ rồi nè~`)
                 .addFields(
-                    { name: 'Nghệ sĩ', value: `\`${track.author}\``, inline: true },
-                    { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true },
-                    { name: 'Hàng chờ', value: `\`${positionText}\``, inline: true }
+                    { name: '<:member:1452367060419088455>  Nghệ sĩ', value: `\`${track.author}\``, inline: true },
+                    { name: '<a:Loading:1452376829062283478> Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true },
+                    { name: '<:notebookkk:1444335515024363734>  Vị trí', value: `\`${positionText}\``, inline: true }
                 );
         }
 
@@ -185,10 +185,10 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
     const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
     const embed = new EmbedBuilder()
-        .setAuthor({ name: 'KẾT QUẢ TÌM KIẾM', iconURL: member.user.displayAvatarURL() })
-        .setDescription(`Tìm thấy **${tracks.length}** kết quả cho \`${query}\`. Vui lòng chọn bên dưới:`)
+        .setAuthor({ name: 'KẾT QUẢ TÌM KIẾM NÈ~', iconURL: member.user.displayAvatarURL() })
+        .setDescription(`> Tìm thấy **${tracks.length}** kết quả cho \`${query}\`. Chọn bên dưới đi nha~`)
         .setColor(COLORS.MAIN)
-        .setFooter({ text: 'Âm nhạc đi trước tình yêu theo sau', iconURL: member.user.displayAvatarURL() });
+        .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: member.user.displayAvatarURL() });
 
     if (isInteraction) await context.editReply({ embeds: [embed], components: [row] });
     else await context.reply({ embeds: [embed], components: [row] });

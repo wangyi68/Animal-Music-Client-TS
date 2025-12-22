@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'pause',
@@ -39,9 +39,10 @@ async function togglePause(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Hiện tại không có nhạc đang phát.';
-        const embedError = new EmbedBuilder().setDescription(`${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'À mà! Chưa có nhạc nào đâu mà pause với resume!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
@@ -49,7 +50,7 @@ async function togglePause(
     player.pause(!isPaused);
 
     const embed = new EmbedBuilder()
-        .setDescription(isPaused ? 'Đã tiếp tục phát nhạc!' : 'Đã tạm dừng phát nhạc!')
+        .setDescription(isPaused ? '> Tiếp tục phát nhạc rồi nè~' : '> Tạm dừng phát nhạc rồi nha!')
         .setColor(0xFFC0CB);
 
     if (message) {

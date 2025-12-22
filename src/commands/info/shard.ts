@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { table } from 'table';
 import moment from 'moment';
 import 'moment-duration-format';
@@ -8,7 +8,7 @@ import 'moment-duration-format';
 const command: Command = {
     name: 'shard',
     description: 'Xem thông tin chi tiết về các Shard',
-    aliases: ['shards', 'stats'],
+    aliases: ['shards'],
     config: createCommandConfig({
         category: 'info',
         usage: 'shard',

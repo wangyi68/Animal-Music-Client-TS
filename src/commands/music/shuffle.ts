@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'shuffle',
@@ -39,23 +39,25 @@ async function shuffleQueue(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Shuffle cái gì?! Chưa có nhạc nào đang phát hết á!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
     if (player.queue.size < 2) {
-        const errorMsg = 'Cần ít nhất 2 bài hát trong hàng chờ để xáo trộn!';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Trộn sao được khi chỉ có 1-2 bài! Thêm vào đi rồi tớ trộn cho~';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
     player.queue.shuffle();
 
     const embed = new EmbedBuilder()
-        .setDescription(`Đã xáo trộn **${player.queue.size}** bài hát trong hàng chờ!`)
+        .setDescription(`Tớ đã trộn **${player.queue.size}** bài hát trong hàng chờ giúp bạn rồi nè!`)
         .setColor(0xFFC0CB);
 
     if (message) {

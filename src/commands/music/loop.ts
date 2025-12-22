@@ -1,7 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import { setLoopMode, getLoopMode } from '../services/MusicManager.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext, LoopMode } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import { setLoopMode, getLoopMode } from '../../services/MusicManager.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext, LoopMode } from '../../types/index.js';
 
 const LOOP_MODES = ['Tắt', 'Bài hát', 'Hàng chờ'];
 
@@ -54,9 +54,10 @@ async function toggleLoop(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Loop cái gì khi chưa có nhạc vậy hả?!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
@@ -77,7 +78,7 @@ async function toggleLoop(
     setLoopMode(guildId, newMode);
 
     const embed = new EmbedBuilder()
-        .setDescription(`Chế độ lặp: **${LOOP_MODES[newMode]}**`)
+        .setDescription(`Đã chuyển chế độ lặp sang: **${LOOP_MODES[newMode]}** nha~`)
         .setColor(0xFFC0CB);
 
     if (message) {

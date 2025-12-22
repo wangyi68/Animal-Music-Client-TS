@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { createCommandConfig } from '../handlers/CommandHandler.js';
-import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../types/index.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 
 const command: Command = {
     name: 'clear',
@@ -39,9 +39,10 @@ async function clearQueue(
     const player = client.kazagumo.players.get(guildId);
 
     if (!player) {
-        const errorMsg = 'Không có gì đang phát ấy ? thử lại ikkk.... ❌';
-        const embedError = new EmbedBuilder().setDescription(`❌ ${errorMsg}`).setColor(0xFF0000);
+        const errorMsg = 'Clear cái gì?! Làm gì có gì để clear đâu mà!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
+        else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
     }
 
@@ -49,7 +50,7 @@ async function clearQueue(
     player.queue.clear();
 
     const embed = new EmbedBuilder()
-        .setDescription(`🗑️ | Đã xóa **${size}** bài hát khỏi hàng chờ!`)
+        .setDescription(`Tớ đã dọn sạch **${size}** bài hát khỏi hàng chờ rồi nè~`)
         .setColor(0xFFC0CB);
 
     if (message) {

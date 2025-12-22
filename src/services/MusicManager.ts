@@ -153,7 +153,7 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
     if (!channel) return;
 
     const embed = new EmbedBuilder()
-        .setDescription(`Danh sách phát kết thúc rồi nè, hẹn gặp lại bạn nha~`)
+        .setDescription(`> Hết nhạc rồi nè~ Muốn nghe nữa thì thêm bài vào đi nha!`)
         .setColor(0xFFC0CB);
 
     channel.send({ embeds: [embed] }).catch(() => { });
@@ -165,24 +165,25 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSi
     const duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     const authorName = track.requester ? (track.requester as any).username : 'Không rõ';
 
-    // Queue info
+    // Queue info with markdown
     const queueInfo = queueSize !== undefined && queueSize > 0
-        ? `Còn ${queueSize} bài trong hàng chờ`
-        : 'Hàng chờ đang trống~';
+        ? `Còn **${queueSize}** bài nữa nè!`
+        : 'Hàng chờ trống rồi...';
 
     return new EmbedBuilder()
         .setColor(0xFFC0CB) // Pink Main Color
         .setAuthor({
-            name: `Giai điệu đang vang lên nè~`,
+            name: `Đang phát cho bạn nghe nè~`,
             iconURL: botAvatarUrl
         })
         .setTitle(track.title)
         .setURL(track.uri || null)
         .setThumbnail(track.thumbnail || null)
+        .setDescription(`><a:Music:1452370827474636810> **Bài hát bởi** ${track.author}`)
         .addFields(
-            { name: 'Nghệ sĩ', value: `\`${track.author}\``, inline: true },
-            { name: 'Thời lượng', value: `\`${duration}\``, inline: true },
-            { name: 'Người yêu cầu', value: `\`${authorName}\``, inline: true }
+            { name: '<a:Loading:1452376829062283478> **Thời lượng**', value: `\`${duration}\``, inline: true },
+            { name: '<a:xoayxoat:1444329766600708258> **Yêu cầu bởi**', value: `\`${authorName}\``, inline: true },
+            { name: '<:guranote:1444001458600022179> **Hàng chờ**', value: `\`${queueSize || 0} bài\``, inline: true }
         )
         .setFooter({
             text: `Animal Music • ${queueInfo}`,

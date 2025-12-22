@@ -124,7 +124,7 @@ export async function handleSlashCommand(
 
     if (!command) {
         const embed = new EmbedBuilder()
-            .setDescription('❌ Lệnh không tồn tại!')
+            .setDescription('> Hả?! Lệnh này không tồn tại đâu!')
             .setColor(COLORS.ERROR);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         return;
@@ -135,7 +135,7 @@ export async function handleSlashCommand(
         const member = interaction.member as any;
         if (!member?.voice?.channel) {
             const embed = new EmbedBuilder()
-                .setDescription('❌ | Bạn đang không ở trong phòng Voice')
+                .setDescription('> Vào **phòng Voice** đi rồi tớ mới phát nhạc cho!')
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -150,7 +150,7 @@ export async function handleSlashCommand(
     );
     if (cooldownRemaining !== null) {
         const embed = new EmbedBuilder()
-            .setDescription(`Hãy đợi ${cooldownRemaining.toFixed(1)}s để sử dụng lệnh.`)
+            .setDescription(`> Bình tĩnh nào! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi~`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         return;
@@ -175,7 +175,7 @@ export async function handleSlashCommand(
 
             // Legacy support (not fully implemented here as we prefer strict slash handlers)
             const embed = new EmbedBuilder()
-                .setDescription(`✅ Lệnh \`${command.name}\` đã được thực thi!`)
+                .setDescription(`> Lệnh **${command.name}** đã được thực thi!`)
                 .setColor(COLORS.SUCCESS);
             await interaction.editReply({ embeds: [embed] });
         }
@@ -183,7 +183,7 @@ export async function handleSlashCommand(
         logger.error(`Error executing slash command ${command.name}: ${(error as Error).message}`);
 
         const embed = new EmbedBuilder()
-            .setDescription('❌ Có lỗi xảy ra khi thực thi lệnh!')
+            .setDescription('> Có lỗi xảy ra khi thực thi lệnh rồi nè!')
             .setColor(COLORS.ERROR);
 
         if (interaction.deferred || interaction.replied) {
@@ -234,26 +234,26 @@ async function handleSlashResult(
         case 'error':
             if (!interaction.replied && !interaction.deferred) {
                 const embed = new EmbedBuilder()
-                    .setDescription(`❌ ${result.message}`)
+                    .setDescription(`> ${result.message}`)
                     .setColor(COLORS.ERROR);
                 await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             }
             break;
         case 'invalidArguments':
             const embedArg = new EmbedBuilder()
-                .setDescription(`❌ Sai cách dùng lệnh!`)
+                .setDescription(`> Sai cách dùng lệnh rồi! Kiểm tra lại đi nha~`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embedArg], flags: MessageFlags.Ephemeral });
             break;
         case 'insufficientPermissions':
             const embedPerm = new EmbedBuilder()
-                .setDescription('❌ Bạn không có quyền sử dụng lệnh này!')
+                .setDescription('> Bạn không có quyền dùng lệnh này đâu!')
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embedPerm], flags: MessageFlags.Ephemeral });
             break;
         case 'cooldown':
             const embedCool = new EmbedBuilder()
-                .setDescription(`Hãy đợi ${result.remainingTime}s để sử dụng lệnh.`)
+                .setDescription(`> Bình tĩnh nào! Đợi **${result.remainingTime}s** nữa đi~`)
                 .setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedCool], flags: MessageFlags.Ephemeral });
             break;

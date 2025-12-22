@@ -100,7 +100,7 @@ async function processCommand(context: CommandContext, config: Config): Promise<
     if (command.config.voiceChannel || command.config.category === 'music') {
         const memberVoice = context.message.member?.voice?.channel;
         if (!memberVoice) {
-            await tempReply(context.message, '❌ | Bạn đang không ở trong phòng Voice');
+            await tempReply(context.message, 'Vào phòng Voice đi rồi tớ mới chiều!');
             return;
         }
     }
@@ -112,7 +112,7 @@ async function processCommand(context: CommandContext, config: Config): Promise<
         command.config.cooldown
     );
     if (cooldownRemaining !== null) {
-        await tempReply(context.message, `Hãy đợi ${cooldownRemaining.toFixed(1)}s để sử dụng lệnh.`);
+        await tempReply(context.message, `Bình tĩnh nào! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi~`);
         return;
     }
 
@@ -123,7 +123,7 @@ async function processCommand(context: CommandContext, config: Config): Promise<
         command.config.requireBotPermissions
     );
     if (!permCheck.valid) {
-        await tempReply(context.message, `❌ | Thiếu quyền: ${permCheck.missing.join(', ')}`);
+        await tempReply(context.message, `Thiếu quyền **${permCheck.missing.join(', ')}** rồi kìa!`);
         return;
     }
 
@@ -144,13 +144,13 @@ function handleCommandResult(result: CommandResult, context: CommandContext, con
             sendErrorEmbed(context.message, result.message);
             break;
         case 'invalidArguments':
-            tempReply(context.message, `Sai cách dùng lệnh, cách dùng đúng: \`${config.usage}\``);
+            tempReply(context.message, `Sai cách dùng lệnh rồi! Dùng đúng thế này nè: \`${config.usage}\``);
             break;
         case 'insufficientPermissions':
-            tempReply(context.message, '❌ | Bạn không có quyền sử dụng lệnh này!');
+            tempReply(context.message, 'Bạn không có quyền dùng lệnh này đâu!');
             break;
         case 'cooldown':
-            tempReply(context.message, `Hãy đợi ${result.remainingTime}s để sử dụng lệnh.`);
+            tempReply(context.message, `Bình tĩnh nào! Đợi **${result.remainingTime}s** nữa đi~`);
             break;
     }
 }
@@ -158,12 +158,12 @@ function handleCommandResult(result: CommandResult, context: CommandContext, con
 async function sendBotInfo(message: Message, config: Config): Promise<void> {
     const embed = new EmbedBuilder()
         .setDescription(
-            `Chào~ Mình là ca sĩ Isherry:3, prefix của mình là \`${config.app.prefix}\` hoặc là mention tui để dùng lệnh nè:3.\n` +
-            `Sử dụng \`${config.app.prefix}help\` để biết toàn bộ lệnh của tui nè :3.`
+            `Chào~ Mình là bot âm nhạc Animal Music nè, prefix của mình là \`${config.app.prefix}\` hoặc là mention tớ để dùng lệnh nha.\n` +
+            `Sử dụng \`${config.app.prefix}help\` để biết toàn bộ lệnh của tớ nha~`
         )
         .setColor(0xFFC0CB)
         .setFooter({
-            text: 'Music comes first, love follows 💞',
+            text: 'Music comes first, love follows',
             iconURL: message.client.user?.displayAvatarURL()
         });
 
@@ -172,7 +172,7 @@ async function sendBotInfo(message: Message, config: Config): Promise<void> {
 
 async function sendErrorEmbed(message: Message, error: string): Promise<void> {
     const embed = new EmbedBuilder()
-        .setDescription(`❌ | Có lỗi xảy ra: \n\`\`\`\n${error.slice(0, 2000)}\n\`\`\``)
+        .setDescription(`Có lỗi xảy ra rồi nè: \n\`\`\`\n${error.slice(0, 2000)}\n\`\`\``)
         .setColor(0xFF0000);
 
     const reply = await message.reply({ embeds: [embed] });

@@ -46,18 +46,40 @@ function getCommandsPath(): string {
     return join(process.cwd(), 'dist', 'commands');
 }
 
+// Get all .js files recursively from a directory
+function getAllCommandFiles(dir: string): string[] {
+    const files: string[] = [];
+
+    try {
+        const entries = readdirSync(dir, { withFileTypes: true });
+
+        for (const entry of entries) {
+            const fullPath = join(dir, entry.name);
+
+            if (entry.isDirectory()) {
+                // Recursively get files from subdirectories
+                files.push(...getAllCommandFiles(fullPath));
+            } else if (entry.isFile() && entry.name.endsWith('.js') && !entry.name.includes('.map')) {
+                files.push(fullPath);
+            }
+        }
+    } catch (error) {
+        logger.error(`Error reading directory ${dir}: ${(error as Error).message}`);
+    }
+
+    return files;
+}
+
 export async function loadCommands(): Promise<void> {
     const commandsPath = getCommandsPath();
 
     try {
-        const commandFiles = readdirSync(commandsPath).filter(file =>
-            file.endsWith('.js') && !file.includes('.map')
-        );
+        const commandFiles = getAllCommandFiles(commandsPath);
 
-        for (const file of commandFiles) {
+        for (const filePath of commandFiles) {
             try {
-                const filePath = `file://${join(commandsPath, file).replace(/\\/g, '/')}`;
-                const commandModule = await import(filePath);
+                const fileUrl = `file://${filePath.replace(/\\/g, '/')}`;
+                const commandModule = await import(fileUrl);
 
                 // Handle both default export and named export
                 const command: Command = commandModule.default?.default || commandModule.default || commandModule;
@@ -65,10 +87,12 @@ export async function loadCommands(): Promise<void> {
                 if (command && command.name) {
                     registerCommand(command);
                 } else {
-                    logger.warn(`Command file ${file} does not export a valid command`);
+                    const fileName = filePath.split(/[/\\]/).pop();
+                    logger.warn(`Command file ${fileName} does not export a valid command`);
                 }
             } catch (error) {
-                logger.error(`Failed to load command ${file}: ${(error as Error).message}`);
+                const fileName = filePath.split(/[/\\]/).pop();
+                logger.error(`Failed to load command ${fileName}: ${(error as Error).message}`);
             }
         }
 

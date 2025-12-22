@@ -1,31 +1,149 @@
-# Animal Music Client - Phiên bản Cute & Nữ tính 💖
+# Animal Music Client 🎵
 
-Chào mừng bạn đến với **Animal Music Client**, bot âm nhạc Discord được thiết kế với phong cách nhẹ nhàng, dễ thương và vô cùng nữ tính.
+> Bot âm nhạc Discord với tính cách **Tsundere Cute** - dễ thương nhưng cũng hay dỗi!
 
-## ✨ Tính năng nổi bật trong bản cập nhật này:
+---
 
-- **Giao diện Cute & Nhẹ nhàng**: Ngôn ngữ sử dụng trong bot đã được tinh chỉnh thành tiếng Việt thân thiện, ngọt ngào (ví dụ: "Đang phát giúp bạn đó~", "Giai điệu đang vang lên nè~").
-- **Thiết kế Premium & Sạch sẽ**: Loại bỏ hoàn toàn các Emoji màu sắc gây rối mắt, thay vào đó là phong cách tối giản nhưng sang trọng với tone màu Hồng phấn (Pink).
-- **Tránh trôi bài viết**: Các thông báo tạm thời như "Đã thêm vào hàng chờ" sẽ tự động xóa sau 10 giây để giữ cho kênh chat luôn gọn gàng.
-- **Bảng điều khiển thông minh**: Bảng điều khiển nhạc luôn tự động cập nhật ở tin nhắn mới nhất, tránh bị trôi tin nhắn cũ.
-- **Tính ổn định cao**: Sửa hoàn toàn lỗi crash khi bot rời kênh thoại hoặc khi dừng nhạc đột ngột.
+## ✨ Tính năng nổi bật
 
-## 🛠️ Công nghệ sử dụng:
+### 🎀 Tính cách Tsundere Cute
+- **Khi vui**: "Tớ đã thêm bài vào hàng chờ rồi nè~", "Tiếp tục phát nhạc rồi nè~"
+- **Khi dỗi**: "Hảả?! Làm gì có nhạc nào đang phát đâu mà skip!", "Loop cái gì khi chưa có nhạc vậy hả?!"
 
-- **Framework**: Discord.js v14
-- **Music Engine**: Kazagumo & Lavalink
-- **Ngôn ngữ**: TypeScript
+### 🎧 Chức năng âm nhạc
+- Phát nhạc từ **YouTube**, **Spotify**, **SoundCloud**
+- Hàng chờ thông minh với phân trang
+- Loop (Tắt / Bài / Hàng chờ)
+- Shuffle ngẫu nhiên
+- Điều khiển âm lượng
 
-## 📝 Hướng dẫn cài đặt nhanh:
+### 🎛️ Bảng điều khiển thông minh
+- **9 nút điều khiển**: Previous, Pause/Resume, Stop, Next, Loop, Shuffle, Queue, Search, Volume
+- Tự động cập nhật khi bài hát thay đổi
+- Kiểm tra quyền người dùng (chỉ người request được dùng nút Stop/Clear)
 
-1. Copy `config.example.json` thành `config.json`.
-2. Điền Token Bot và thông tin Lavalink của bạn.
-3. Chạy lệnh:
-   ```bash
-   npm install
-   npm run build
-   npm start
-   ```
+### 📋 Lệnh hỗ trợ
+| Lệnh | Mô tả |
+|------|-------|
+| `/play <query>` | Phát nhạc |
+| `/stop` | Dừng phát và xóa hàng chờ |
+| `/pause` | Tạm dừng/tiếp tục |
+| `/skip` | Bỏ qua bài hiện tại |
+| `/queue` | Xem hàng chờ |
+| `/loop <mode>` | Chuyển chế độ lặp |
+| `/shuffle` | Trộn hàng chờ |
+| `/volume <0-100>` | Chỉnh âm lượng |
+| `/clear` | Xóa hàng chờ |
+| `/help` | Xem danh sách lệnh (có Select Menu) |
+| `/stats` | Xem thông tin bot |
+| `/ping` | Kiểm tra độ trễ |
 
-## 🎀 Lời nhắn:
-Hy vọng bạn sẽ có những giây phút thư giãn tuyệt vời cùng giai điệu của Animal Music nha~ Mi-aooo! 🐾
+### 🏗️ Cấu trúc thư mục
+```
+src/
+├── commands/
+│   ├── music/      (play, stop, pause, skip, queue, loop, shuffle, clear, volume)
+│   ├── info/       (help, ping, shard, stats)
+│   └── config/     (prefix)
+├── handlers/
+│   ├── CommandHandler.ts
+│   ├── InteractionHandler.ts
+│   ├── MessageHandler.ts
+│   └── SlashHandler.ts
+├── services/
+│   └── MusicManager.ts
+├── utils/
+│   ├── buttons.ts
+│   ├── constants.ts
+│   └── logger.ts
+└── index.ts
+```
+
+---
+
+## 🛠️ Công nghệ sử dụng
+
+| Công nghệ | Phiên bản |
+|-----------|-----------|
+| Discord.js | v14 |
+| Kazagumo | Latest |
+| Shoukaku | Latest |
+| Lavalink | v4 |
+| TypeScript | v5 |
+| Node.js | v18+ |
+
+---
+
+## 📦 Cài đặt
+
+### 1. Clone repository
+```bash
+git clone https://github.com/your-username/Animal-Music-Client.git
+cd Animal-Music-Client
+```
+
+### 2. Cài đặt dependencies
+```bash
+npm install
+```
+
+### 3. Cấu hình
+Copy `config.example.json` thành `config.json` và điền thông tin:
+```json
+{
+  "token": "YOUR_BOT_TOKEN",
+  "clientId": "YOUR_CLIENT_ID",
+  "prefix": "!",
+  "lavalink": {
+    "nodes": [
+      {
+        "name": "Main",
+        "host": "localhost",
+        "port": 2333,
+        "auth": "youshallnotpass",
+        "secure": false
+      }
+    ]
+  }
+}
+```
+
+### 4. Build và chạy
+```bash
+npm run build
+npm start
+```
+
+---
+
+## 🎨 Phong cách thiết kế
+
+- **Màu chủ đạo**: Hồng phấn (#FFC0CB)
+- **Ngôn ngữ**: Tiếng Việt với giọng điệu thân thiện, đáng yêu
+- **Discord Markdown**: Sử dụng `>` quote, `**bold**`, `` `code` ``
+- **Không emoji tiêu chuẩn**: Thay bằng text emoji cho field names
+
+---
+
+## 🔄 Changelog
+
+### v2.0.0 - Tsundere Cute Update
+- ✅ Tái cấu trúc thư mục commands theo danh mục
+- ✅ Tính cách bot Tsundere Cute (vui khi thành công, dỗi khi lỗi)
+- ✅ Lệnh `/help` với Select Menu chọn danh mục
+- ✅ Lệnh `/stats` hiển thị thông tin bot chi tiết
+- ✅ Kiểm tra quyền người dùng cho nút điều khiển
+- ✅ Auto-leave sau 3 phút khi không có ai trong voice
+- ✅ Discord Markdown formatting cho tất cả tin nhắn
+- ✅ Loại bỏ hoàn toàn emoji tiêu chuẩn
+- ✅ Fix lỗi "Player is already destroyed"
+
+---
+
+## 📝 License
+
+MIT License - Thoải mái sử dụng và chỉnh sửa!
+
+---
+
+> Made with 💖 by Animal Music Team
