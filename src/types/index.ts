@@ -17,6 +17,7 @@ export interface AppConfig {
     token: string;
     prefix: string;
     clientId: number;
+    ownerId: string;
 }
 
 export interface LavalinkNodeConfig {

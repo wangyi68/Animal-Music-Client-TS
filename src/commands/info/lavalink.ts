@@ -7,7 +7,7 @@ import 'moment-duration-format';
 
 const command: Command = {
     name: 'lavalink',
-    description: 'Xem trạng thái các Lavalink node',
+    description: 'Xem trạng thái các Lavalink node (Owner only)',
     aliases: ['nodes', 'lavanodes', 'nodeinfo'],
     config: createCommandConfig({
         category: 'info',
@@ -17,11 +17,26 @@ const command: Command = {
 
     slashCommand: new SlashCommandBuilder()
         .setName('lavalink')
-        .setDescription('Xem trạng thái các Lavalink node') as SlashCommandBuilder,
+        .setDescription('Xem trạng thái các Lavalink node (Owner only)') as SlashCommandBuilder,
 
     async execute(context: CommandContext): Promise<CommandResult> {
         const { message } = context;
         const client = message.client as BotClient;
+
+        // Check if user is bot owner (from config)
+        const ownerId = client.config.app.ownerId;
+
+        if (ownerId && message.author.id !== ownerId) {
+            await message.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(0xFF6B6B)
+                        .setDescription('> ❌ Lệnh này chỉ dành cho **Owner Bot** thôi nha!')
+                ]
+            });
+            return { type: 'error', message: 'Not bot owner' };
+        }
+
         const embed = await createLavalinkEmbed(client);
         await message.reply({ embeds: [embed] });
         return { type: 'success' };
@@ -30,6 +45,22 @@ const command: Command = {
     async executeSlash(context: SlashCommandContext): Promise<CommandResult> {
         const { interaction } = context;
         const client = interaction.client as BotClient;
+
+        // Check if user is bot owner (from config)
+        const ownerId = client.config.app.ownerId;
+
+        if (ownerId && interaction.user.id !== ownerId) {
+            await interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(0xFF6B6B)
+                        .setDescription('> ❌ Lệnh này chỉ dành cho **Owner Bot** thôi nha!')
+                ],
+                ephemeral: true
+            });
+            return { type: 'error', message: 'Not bot owner' };
+        }
+
         await interaction.deferReply();
         const embed = await createLavalinkEmbed(client);
         await interaction.editReply({ embeds: [embed] });
@@ -46,72 +77,51 @@ async function createLavalinkEmbed(client: BotClient): Promise<EmbedBuilder> {
             iconURL: client.user?.displayAvatarURL()
         })
         .setColor(0xFFC0CB)
-        .setThumbnail(client.user?.displayAvatarURL() || null)
-        .setDescription(
-            `> Đang theo dõi **${nodes.length}** Lavalink node${nodes.length > 1 ? 's' : ''}~\n\n` +
-            `### Tổng quan`
-        );
+        .setThumbnail(client.user?.displayAvatarURL() || null);
 
     if (nodes.length === 0) {
-        embed.addFields({
-            name: '⚠️ Không có node nào',
-            value: 'Không tìm thấy Lavalink node nào được cấu hình!',
-            inline: false
-        });
+        embed.setDescription('> ⚠️ Không tìm thấy Lavalink node nào được cấu hình!');
     } else {
         // Summary stats
         const connectedNodes = nodes.filter(n => n.state === 'CONNECTED').length;
         const totalPlayers = nodes.reduce((acc, n) => acc + n.players, 0);
+        const statusText = connectedNodes === nodes.length
+            ? '✅ Tất cả hoạt động'
+            : '⚠️ Có node offline';
 
-        embed.addFields(
-            {
-                name: '> Nodes online',
-                value: `\`${connectedNodes}/${nodes.length}\``,
-                inline: true
-            },
-            {
-                name: '> Tổng players',
-                value: `\`${totalPlayers}\``,
-                inline: true
-            },
-            {
-                name: '> Trạng thái',
-                value: connectedNodes === nodes.length ? '`✅ Tất cả hoạt động`' : '`⚠️ Có node offline`',
-                inline: true
-            }
-        );
+        // Build description with summary
+        let description = `> Đang theo dõi **${nodes.length}** Lavalink nodes\n\n`;
+        description += `**📊 Tổng quan**\n`;
+        description += `┌ **Nodes:** \`${connectedNodes}/${nodes.length}\` online\n`;
+        description += `├ **Players:** \`${totalPlayers}\` đang hoạt động\n`;
+        description += `└ **Trạng thái:** ${statusText}\n\n`;
+        description += `**🖥️ Chi tiết Nodes**`;
 
-        // Add separator
-        embed.addFields({
-            name: '\u200b',
-            value: `### Chi tiết từng Node`,
-            inline: false
-        });
+        embed.setDescription(description);
 
-        // Individual node info
+        // Individual node info - NOT inline for better format
         for (const node of nodes) {
             const statusEmoji = getStatusEmoji(node.state);
             const uptime = node.uptime > 0
-                ? (moment.duration(node.uptime) as any).format("D[d] H[h] m[m] s[s]")
+                ? (moment.duration(node.uptime) as any).format("D[d] H[h] m[m]")
                 : 'N/A';
 
-            const memUsedMB = (node.memory.used / 1024 / 1024).toFixed(1);
-            const memAllocatedMB = (node.memory.allocated / 1024 / 1024).toFixed(1);
+            const memUsedMB = (node.memory.used / 1024 / 1024).toFixed(0);
+            const memAllocatedMB = (node.memory.allocated / 1024 / 1024).toFixed(0);
 
+            // Compact format
             const fieldValue = [
-                `**Trạng thái:** ${statusEmoji} \`${node.state}\``,
-                `**URL:** \`${node.url}\``,
-                `**Players:** \`${node.players}\``,
-                `**CPU:** \`${node.cpu}%\``,
-                `**RAM:** \`${memUsedMB}MB / ${memAllocatedMB}MB\``,
-                `**Uptime:** \`${uptime}\``,
-                `**Ping:** \`${node.ping >= 0 ? node.ping + 'ms' : 'N/A'}\``
+                `┌ **Trạng thái:** ${statusEmoji} ${node.state}`,
+                `├ **Players:** ${node.players} | **CPU:** ${node.cpu}%`,
+                `├ **RAM:** ${memUsedMB}MB / ${memAllocatedMB}MB`,
+                `├ **Uptime:** ${uptime}`,
+                `└ **Ping:** ${node.ping >= 0 ? node.ping + 'ms' : 'N/A'}`
             ].join('\n');
 
             embed.addFields({
-                name: `${statusEmoji} Node: ${node.name}`,
+                name: `${statusEmoji} ${node.name}`,
                 value: fieldValue,
-                inline: true
+                inline: false  // Changed to false for better readability
             });
         }
     }

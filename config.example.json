@@ -2,7 +2,8 @@
     "app": {
         "token": "",
         "prefix": "!",
-        "clientId": 0
+        "clientId": 0,
+        "ownerId": ""
     },
     "lavalink": {
         "nodes": [
