@@ -150,7 +150,10 @@ async function main(): Promise<void> {
     });
 
     // Event: Voice State Update
+    const autoLeaveTimers = new Map<string, NodeJS.Timeout>();
+
     client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+        // Bot was disconnected
         if (oldState.member?.id === client.user?.id && !newState.channel) {
             const player = client.kazagumo.players.get(oldState.guild.id);
             if (player) {
@@ -159,6 +162,57 @@ async function main(): Promise<void> {
                 } catch (error) {
                     // Ignore already destroyed errors
                 }
+            }
+            // Clear any pending auto-leave timer
+            const timer = autoLeaveTimers.get(oldState.guild.id);
+            if (timer) {
+                clearTimeout(timer);
+                autoLeaveTimers.delete(oldState.guild.id);
+            }
+            return;
+        }
+
+        // Check if someone left the voice channel where bot is
+        const player = client.kazagumo.players.get(oldState.guild.id);
+        if (!player || !player.voiceId) return;
+
+        const voiceChannel = client.channels.cache.get(player.voiceId);
+        if (!voiceChannel || voiceChannel.type !== 2) return; // 2 = GUILD_VOICE
+
+        const members = (voiceChannel as any).members?.filter((m: any) => !m.user.bot);
+        const memberCount = members?.size ?? 0;
+
+        // If bot is alone in the channel
+        if (memberCount === 0) {
+            // Start 3-minute timer to auto-leave
+            if (!autoLeaveTimers.has(oldState.guild.id)) {
+                const timer = setTimeout(async () => {
+                    const currentPlayer = client.kazagumo.players.get(oldState.guild.id);
+                    if (currentPlayer) {
+                        // Double check if still alone
+                        const vc = client.channels.cache.get(currentPlayer.voiceId || '');
+                        const stillAlone = vc && (vc as any).members?.filter((m: any) => !m.user.bot).size === 0;
+
+                        if (stillAlone) {
+                            try {
+                                await currentPlayer.destroy();
+                                logger.info(`Auto-left voice channel in guild ${oldState.guild.id} due to inactivity`);
+                            } catch (e) {
+                                // Ignore
+                            }
+                        }
+                    }
+                    autoLeaveTimers.delete(oldState.guild.id);
+                }, 3 * 60 * 1000); // 3 minutes
+
+                autoLeaveTimers.set(oldState.guild.id, timer);
+            }
+        } else {
+            // Someone joined, cancel the timer
+            const timer = autoLeaveTimers.get(oldState.guild.id);
+            if (timer) {
+                clearTimeout(timer);
+                autoLeaveTimers.delete(oldState.guild.id);
             }
         }
     });

@@ -145,10 +145,14 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
                     { name: 'Người thêm', value: `\`${member.user.username}\``, inline: true }
                 );
         } else {
+            const position = player.queue.size;
+            const positionText = position === 0 ? 'Đang phát ngay!' : `Vị trí #${position}`;
+
             embed.setDescription(`Bài hát **[${track.title}](${track.uri})** đã được nằm trong hàng chờ rồi nè~`)
                 .addFields(
                     { name: 'Nghệ sĩ', value: `\`${track.author}\``, inline: true },
-                    { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true }
+                    { name: 'Thời lượng', value: `\`${Math.floor((track.length || 0) / 60000)}:${Math.floor(((track.length || 0) % 60000) / 1000).toString().padStart(2, '0')}\``, inline: true },
+                    { name: 'Hàng chờ', value: `\`${positionText}\``, inline: true }
                 );
         }
 

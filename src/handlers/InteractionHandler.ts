@@ -134,6 +134,33 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
             const embedClear = new EmbedBuilder().setDescription('Tớ đã dọn dẹp danh sách chờ sạch bóng luôn rồi đó~').setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedClear], flags: MessageFlags.Ephemeral });
             return;
+
+        case 'queue_btn':
+            const current = player.queue.current;
+            const tracks = [...player.queue].slice(0, 10);
+
+            let description = current
+                ? `**Đang phát:** [${current.title}](${current.uri})\n\n`
+                : 'Không có bài nào đang phát.\n\n';
+
+            if (tracks.length > 0) {
+                description += '**Hàng chờ:**\n';
+                description += tracks.map((track, i) => `\`${i + 1}.\` [${track.title}](${track.uri})`).join('\n');
+                if (player.queue.size > 10) {
+                    description += `\n\n...và còn ${player.queue.size - 10} bài nữa`;
+                }
+            } else {
+                description += '*Hàng chờ đang trống trơn rồi đó~*';
+            }
+
+            const embedQueue = new EmbedBuilder()
+                .setAuthor({ name: 'HÀNG CHỜ HIỆN TẠI NÈ~', iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(description)
+                .setFooter({ text: `Tổng cộng ${player.queue.size} bài trong hàng chờ` })
+                .setColor(COLORS.MAIN);
+
+            await interaction.reply({ embeds: [embedQueue], flags: MessageFlags.Ephemeral });
+            return;
     }
 
     if (customId === 'search_btn') {

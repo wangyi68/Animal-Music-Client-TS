@@ -98,7 +98,7 @@ function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: 
         data.lastMessageId = null;
     }
 
-    const embed = createCompactEmbed(track, client.user?.displayAvatarURL() || undefined);
+    const embed = createCompactEmbed(track, client.user?.displayAvatarURL() || undefined, player.queue.size);
 
     channel.send({ embeds: [embed], components: components })
         .then(msg => {
@@ -159,11 +159,16 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
     channel.send({ embeds: [embed] }).catch(() => { });
 }
 
-function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string): EmbedBuilder {
+function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSize?: number): EmbedBuilder {
     const minutes = Math.floor((track.length || 0) / 60000);
     const seconds = Math.floor(((track.length || 0) % 60000) / 1000);
     const duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     const authorName = track.requester ? (track.requester as any).username : 'Không rõ';
+
+    // Queue info
+    const queueInfo = queueSize !== undefined && queueSize > 0
+        ? `Còn ${queueSize} bài trong hàng chờ`
+        : 'Hàng chờ đang trống~';
 
     return new EmbedBuilder()
         .setColor(0xFFC0CB) // Pink Main Color
@@ -176,11 +181,11 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string): EmbedB
         .setThumbnail(track.thumbnail || null)
         .addFields(
             { name: 'Nghệ sĩ', value: `\`${track.author}\``, inline: true },
-            { name: 'Thời gian', value: `\`${duration}\``, inline: true },
+            { name: 'Thời lượng', value: `\`${duration}\``, inline: true },
             { name: 'Người yêu cầu', value: `\`${authorName}\``, inline: true }
         )
         .setFooter({
-            text: `Animal Music • Đang phát giúp bạn đó~`,
+            text: `Animal Music • ${queueInfo}`,
             iconURL: botAvatarUrl
         })
         .setTimestamp();

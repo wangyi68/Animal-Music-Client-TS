@@ -24,6 +24,10 @@ export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: Loo
         new ButtonBuilder()
             .setCustomId('skip')
             .setLabel('Bỏ qua')
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId('queue_btn')
+            .setLabel('Hàng chờ')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -55,7 +59,7 @@ export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: Loo
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('volume_btn')
-            .setLabel(`Âm lượng: ${player.volume}%`)
+            .setLabel(`${player.volume}%`)
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('clear')
