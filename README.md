@@ -121,6 +121,12 @@ Copy `config.example.json` thành `config.json` và điền thông tin:
 }
 ```
 
+### 🔗 Nguồn Lavalink miễn phí
+Bạn có thể tìm thấy danh sách các Public Lavalink Nodes tại:
+- https://lavalink.darrennathanael.com/
+- https://freelavalink.serenetia.com/
+- https://freelavalink.serenetia.com/list
+
 ### 4. Build và chạy
 ```bash
 npm run build
