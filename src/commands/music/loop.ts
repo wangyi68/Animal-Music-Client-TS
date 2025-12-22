@@ -81,7 +81,7 @@ async function toggleLoop(
         newMode = ((currentMode + 1) % 3) as LoopMode;
     }
 
-    setLoopMode(guildId, newMode);
+    setLoopMode(guildId, newMode, player);
 
     const embed = new EmbedBuilder()
         .setDescription(`> Đã chuyển chế độ lặp sang **${LOOP_MODES[newMode]}** rồi nha! Nghe cho chán thì thôi!`)

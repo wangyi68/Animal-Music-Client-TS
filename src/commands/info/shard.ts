@@ -1,10 +1,9 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { table } from 'table';
 import moment from 'moment';
 import 'moment-duration-format';
-import { COLORS } from '../../utils/constants.js';
 import { smartDelete, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
@@ -26,11 +25,7 @@ const command: Command = {
         const client = message.client as BotClient;
         const tableResult = await getShardInfo(client);
 
-        const embed = new EmbedBuilder()
-            .setDescription(`\`\`\`asciidoc\n${tableResult}\n\`\`\``)
-            .setColor(COLORS.MAIN);
-
-        const msg = await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ content: `\`\`\`\n${tableResult}\n\`\`\`` });
         smartDelete(msg, { type: MessageType.INFO, contentLength: 500 });
         return { type: 'success' };
     },
@@ -42,11 +37,7 @@ const command: Command = {
         await interaction.deferReply();
         const tableResult = await getShardInfo(client);
 
-        const embed = new EmbedBuilder()
-            .setDescription(`\`\`\`asciidoc\n${tableResult}\n\`\`\``)
-            .setColor(COLORS.MAIN);
-
-        const msg = await interaction.editReply({ embeds: [embed] });
+        const msg = await interaction.editReply({ content: `\`\`\`\n${tableResult}\n\`\`\`` });
         smartDelete(msg, { type: MessageType.INFO, contentLength: 500 });
         return { type: 'success' };
     }
@@ -103,7 +94,7 @@ async function getShardInfo(client: BotClient): Promise<string> {
             res[0],
             res[1].toLocaleString('en-US'),
             res[2].toLocaleString('en-US'),
-            '', // UpTime column empty for shards in sample
+            '',
             res[5] + 'ms',
             formatBytes(res[6]),
             formatBytes(res[7])

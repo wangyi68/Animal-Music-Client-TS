@@ -144,7 +144,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
         case 'loop':
             const currentMode = getLoopMode(interaction.guildId!);
             const newMode = (currentMode + 1) % 3 as LoopMode;
-            setLoopMode(interaction.guildId!, newMode);
+            setLoopMode(interaction.guildId!, newMode, player);
             updateNeeded = true;
             break;
 
@@ -210,7 +210,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
             .setTitle('Điều chỉnh âm lượng');
         const volumeInput = new TextInputBuilder()
             .setCustomId('volume_input')
-            .setLabel('Nhập âm lượng (0-100)')
+            .setLabel('Nhập âm lượng (0-200)')
             .setStyle(TextInputStyle.Short)
             .setPlaceholder(player.volume.toString())
             .setRequired(true)
@@ -322,9 +322,9 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
         const volumeStr = interaction.fields.getTextInputValue('volume_input');
         const volume = parseInt(volumeStr);
 
-        if (isNaN(volume) || volume < 0 || volume > 100) {
+        if (isNaN(volume) || volume < 0 || volume > 200) {
             const embed = new EmbedBuilder()
-                .setDescription(`> Đã bảo là từ **0** đến **100** thôi! Không biết đếm à?`)
+                .setDescription(`> Đã bảo là từ **0** đến **200** thôi! Không biết đếm à?`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -332,7 +332,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         player.setVolume(volume);
         const embed = new EmbedBuilder()
-            .setDescription(`> Rồi rồi! Đã chỉnh xuống **${volume}%** rồi nhé! Đừng bắt tớ chỉnh nữa!`)
+            .setDescription(`> Rồi rồi! Đã chỉnh **${volume}%** rồi nhé! Đừng bắt tớ chỉnh nữa!`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }

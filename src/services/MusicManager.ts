@@ -18,6 +18,7 @@ interface ExtendedPlayerData {
     textChannelId: string;
     loopMode: LoopMode;
     history: KazagumoTrack[];
+    originalQueue: KazagumoTrack[];
     lastMessageId: string | null;
 }
 
@@ -49,7 +50,7 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
         defaultSearchEngine: 'youtube_music',
         send: (guildId, payload) => {
             const guild = client.guilds.cache.get(guildId);
-            if (guild) guild.shard.send(payload);
+            if (guild) client.ws.shards.get(guild.shardId)?.send(payload);
         },
         plugins: []
     }, new Connectors.DiscordJS(client), nodes, {
@@ -64,8 +65,9 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
         logger.info(`Cluster '${name}' is ready!`);
     });
 
-    // Silent handlers for error/close/disconnect/reconnecting to avoid log spam
-    kazagumo.shoukaku.on('error', () => { });
+    // Log warnings for Lavalink errors
+    kazagumo.shoukaku.on('error', (name, error) => {
+    });
     kazagumo.shoukaku.on('close', () => { });
     kazagumo.shoukaku.on('disconnect', (() => { }) as any);
     kazagumo.shoukaku.on('reconnecting', (() => { }) as any);
@@ -79,8 +81,12 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
         handleTrackEnd(player);
     });
 
-    kazagumo.on('playerEmpty' as any, (player: KazagumoPlayer) => {
+    kazagumo.on('playerEmpty', (player: KazagumoPlayer) => {
         handleQueueEmpty(player, client);
+    });
+
+    kazagumo.on('playerDestroy', (player: KazagumoPlayer) => {
+        removePlayerData(player.guildId);
     });
 
     return kazagumo;
@@ -122,22 +128,22 @@ function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: 
     const data = getPlayerData(player.guildId);
     if (!data?.textChannelId) return;
 
-    const channel = client.channels.cache.get(data.textChannelId) as TextChannel;
-    if (!channel) return;
+    const channel = client.channels.cache.get(data.textChannelId);
+    if (!channel?.isTextBased() || channel.isDMBased()) return;
 
     // Use unified button creator
     const components = createPlayerControlButtons(player, data.loopMode);
 
     // Delete previous message if exists
     if (data.lastMessageId) {
-        channel.messages.delete(data.lastMessageId).catch(() => { });
+        (channel as TextChannel).messages.delete(data.lastMessageId).catch(() => { });
         data.lastMessageId = null;
     }
 
     const nodeName = player.shoukaku.node.name;
     const embed = createCompactEmbed(track, client.user?.displayAvatarURL() || undefined, player.queue.size, nodeName);
 
-    channel.send({ embeds: [embed], components: components })
+    (channel as TextChannel).send({ embeds: [embed], components: components })
         .then(msg => {
             data.lastMessageId = msg.id;
             // No longer auto-delete after duration, we manually manage it on next track start
@@ -175,10 +181,10 @@ function handleTrackEnd(player: KazagumoPlayer): void {
     }
 
     if (data.loopMode === 1 && currentTrack) {
-        player.queue.add(currentTrack);
-    } else if (data.loopMode === 2 && player.queue.size === 0 && data.history.length > 0) {
-        data.history.forEach(track => player.queue.add(track));
-        data.history = [];
+        player.queue.add(Object.assign(Object.create(Object.getPrototypeOf(currentTrack)), currentTrack));
+    } else if (data.loopMode === 2 && player.queue.size === 0 && data.originalQueue.length > 0) {
+        // Restore original queue from snapshot when empty
+        data.originalQueue.forEach(track => player.queue.add(Object.assign(Object.create(Object.getPrototypeOf(track)), track)));
     }
 }
 
@@ -186,14 +192,14 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
     const data = getPlayerData(player.guildId);
     if (!data?.textChannelId) return;
 
-    const channel = client.channels.cache.get(data.textChannelId) as TextChannel;
-    if (!channel) return;
+    const channel = client.channels.cache.get(data.textChannelId);
+    if (!channel?.isTextBased() || channel.isDMBased()) return;
 
     const embed = new EmbedBuilder()
         .setDescription(`> Hết nhạc rồi! Chán quá đi mất! Muốn nghe nữa thì thêm bài vào đi!`)
         .setColor(COLORS.MAIN);
 
-    channel.send({ embeds: [embed] }).catch(() => { });
+    (channel as TextChannel).send({ embeds: [embed] }).catch(() => { });
 }
 
 function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSize?: number, nodeName?: string): EmbedBuilder {
@@ -240,6 +246,7 @@ export function setPlayerData(guildId: string, textChannelId: string): void {
         textChannelId,
         loopMode: 0,
         history: [],
+        originalQueue: [],
         lastMessageId: null
     });
 }
@@ -248,10 +255,20 @@ export function removePlayerData(guildId: string): void {
     playerDataMap.delete(guildId);
 }
 
-export function setLoopMode(guildId: string, mode: LoopMode): void {
+export function setLoopMode(guildId: string, mode: LoopMode, player?: KazagumoPlayer): void {
     const data = playerDataMap.get(guildId);
     if (data) {
         data.loopMode = mode;
+        if (mode === 2 && player) {
+            // Snapshot current queue
+            data.originalQueue = [...player.queue];
+            if (player.queue.current) {
+                // Clone current track using object create to keep prototype
+                data.originalQueue.unshift(Object.assign(Object.create(Object.getPrototypeOf(player.queue.current)), player.queue.current));
+            }
+        } else if (mode !== 2) {
+            data.originalQueue = [];
+        }
     }
 }
 

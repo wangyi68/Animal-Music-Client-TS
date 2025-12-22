@@ -165,13 +165,13 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
         )
         .addFields({
             name: '\u200b',
-            value: `### Lavalink Dev Info`,
+            value: `**Lavalink Dev Info**`,
             inline: false
         })
         .addFields(
-            ...lavalinkNodes.slice(0, 3).map(node => ({
+            ...lavalinkNodes.slice(0, 2).map(node => ({
                 name: `> ${node.state === 'CONNECTED' ? '🟢' : '🔴'} ${node.name}`,
-                value: `\`${node.players} players\` | \`${node.cpu}% CPU\``,
+                value: `\`players: ${node.players}\` | \`CPU: ${node.cpu}%\``,
                 inline: true
             }))
         )
