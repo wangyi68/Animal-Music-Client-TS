@@ -7,8 +7,14 @@
     "lavalink": {
         "nodes": [
             {
-                "name": "Localhost",
+                "name": "Primary",
                 "url": "localhost:2333",
+                "auth": "youshallnotpass",
+                "secure": false
+            },
+            {
+                "name": "Secondary",
+                "url": "localhost:2334",
                 "auth": "youshallnotpass",
                 "secure": false
             }

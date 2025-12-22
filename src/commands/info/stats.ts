@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder, version } from 'discord.js';
 import { createCommandConfig, commands } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { getLavalinkNodesStatus } from '../../services/MusicManager.js';
 import moment from 'moment';
 import 'moment-duration-format';
 import os from 'os';
@@ -54,6 +55,14 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
 
     // Get active players
     const activePlayers = client.kazagumo?.players?.size || 0;
+
+    // Get Lavalink nodes status
+    const lavalinkNodes = getLavalinkNodesStatus(client.kazagumo);
+    const connectedNodes = lavalinkNodes.filter(n => n.state === 'CONNECTED').length;
+    const totalNodes = lavalinkNodes.length;
+    const lavalinkStatus = connectedNodes === totalNodes
+        ? `✅ ${connectedNodes}/${totalNodes}`
+        : `⚠️ ${connectedNodes}/${totalNodes}`;
 
     const embed = new EmbedBuilder()
         .setAuthor({
@@ -145,10 +154,22 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
                 inline: true
             },
             {
-                name: '> Lavalink',
-                value: `\`${client.kazagumo?.shoukaku?.nodes?.size || 0} node\``,
+                name: '> Lavalink Nodes',
+                value: `\`${lavalinkStatus}\``,
                 inline: true
             }
+        )
+        .addFields({
+            name: '\u200b',
+            value: `### Lavalink Status`,
+            inline: false
+        })
+        .addFields(
+            ...lavalinkNodes.slice(0, 3).map(node => ({
+                name: `> ${node.state === 'CONNECTED' ? '🟢' : '🔴'} ${node.name}`,
+                value: `\`${node.players} players\` | \`${node.cpu}% CPU\``,
+                inline: true
+            }))
         )
         .setFooter({
             text: 'Animal Music • Made with love',

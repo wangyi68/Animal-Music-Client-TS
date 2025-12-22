@@ -11,7 +11,7 @@ import {
     StringSelectMenuOptionBuilder
 } from 'discord.js';
 import { createLogger } from '../utils/logger.js';
-import type { Config, LoopMode, PlayerSyncData } from '../types/index.js';
+import type { Config, LoopMode, PlayerSyncData, LavalinkNodeStatus } from '../types/index.js';
 import { AnimalSync } from './AnimalSync.js';
 import { EMOJIS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
@@ -29,6 +29,14 @@ interface ExtendedPlayerData {
 const playerDataMap = new Map<string, ExtendedPlayerData>();
 
 export function createKazagumo(client: Client, config: Config): Kazagumo {
+    // Use all configured nodes instead of just the first one
+    const nodes = config.lavalink.nodes.map(node => ({
+        name: node.name,
+        url: node.url,
+        auth: node.auth,
+        secure: node.secure
+    }));
+
     const kazagumo = new Kazagumo({
         defaultSearchEngine: 'youtube_music',
         send: (guildId, payload) => {
@@ -36,33 +44,23 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
             if (guild) guild.shard.send(payload);
         },
         plugins: []
-    }, new Connectors.DiscordJS(client), config.lavalink.nodes.length > 0 ? [config.lavalink.nodes[0]] : [], {
+    }, new Connectors.DiscordJS(client), nodes, {
         moveOnDisconnect: true,
         resume: true,
         reconnectTries: 5,
         restTimeout: 10000
     });
 
-    // Event handlers
+    // Event handlers - Only log when node is ready (successful connection)
     kazagumo.shoukaku.on('ready', (name: string) => {
         logger.info(`Node '${name}' is ready!`);
     });
 
-    kazagumo.shoukaku.on('error', (name: string, error: Error) => {
-        logger.error(`Node '${name}' error: ${error.message}`);
-    });
-
-    kazagumo.shoukaku.on('close', (name: string, code: number, reason: string) => {
-        logger.warn(`Node '${name}' closed with code ${code}: ${reason}`);
-    });
-
-    kazagumo.shoukaku.on('disconnect', ((name: string, players: any, moved: boolean) => {
-        if (moved) {
-            logger.info(`Node '${name}' disconnected. Players moved.`);
-        } else {
-            logger.warn(`Node '${name}' disconnected.`);
-        }
-    }) as any);
+    // Silent handlers for error/close/disconnect/reconnecting to avoid log spam
+    kazagumo.shoukaku.on('error', () => { });
+    kazagumo.shoukaku.on('close', () => { });
+    kazagumo.shoukaku.on('disconnect', (() => { }) as any);
+    kazagumo.shoukaku.on('reconnecting', (() => { }) as any);
 
     // Player events
     kazagumo.on('playerStart' as any, (player: KazagumoPlayer, track: KazagumoTrack) => {
@@ -78,6 +76,36 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
     });
 
     return kazagumo;
+}
+
+// Get status of all Lavalink nodes
+export function getLavalinkNodesStatus(kazagumo: Kazagumo): LavalinkNodeStatus[] {
+    const statuses: LavalinkNodeStatus[] = [];
+
+    kazagumo.shoukaku.nodes.forEach((node, name) => {
+        const stats = node.stats;
+        const nodeAny = node as any;
+        statuses.push({
+            name: name,
+            url: `${nodeAny.options?.host || nodeAny.url || 'unknown'}:${nodeAny.options?.port || ''}`.replace(/:$/, ''),
+            state: node.state === 0 ? 'CONNECTING'
+                : node.state === 1 ? 'CONNECTED'
+                    : node.state === 2 ? 'DISCONNECTED'
+                        : 'RECONNECTING',
+            players: stats?.players || 0,
+            cpu: stats?.cpu?.systemLoad ? Math.round(stats.cpu.systemLoad * 100) : 0,
+            memory: {
+                used: stats?.memory?.used || 0,
+                free: stats?.memory?.free || 0,
+                allocated: stats?.memory?.allocated || 0,
+                reservable: stats?.memory?.reservable || 0
+            },
+            uptime: stats?.uptime || 0,
+            ping: typeof nodeAny.ws?.ping === 'number' ? nodeAny.ws.ping : -1
+        });
+    });
+
+    return statuses;
 }
 
 function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: Client): void {
@@ -179,7 +207,7 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSi
         .setTitle(track.title)
         .setURL(track.uri || null)
         .setThumbnail(track.thumbnail || null)
-        .setDescription(`><a:Music:1452370827474636810> **Bài hát bởi** ${track.author}`)
+        .setDescription(`> <a:Music:1452370827474636810> **Bài hát bởi** ${track.author}`)
         .addFields(
             { name: '<a:Loading:1452376829062283478> **Thời lượng**', value: `\`${duration}\``, inline: true },
             { name: '<a:xoayxoat:1444329766600708258> **Yêu cầu bởi**', value: `\`${authorName}\``, inline: true },

@@ -16,6 +16,7 @@
 - Loop (Tắt / Bài / Hàng chờ)
 - Shuffle ngẫu nhiên
 - Điều khiển âm lượng
+- **Hỗ trợ nhiều Lavalink nodes** với failover tự động
 
 ### 🎛️ Bảng điều khiển thông minh
 - **9 nút điều khiển**: Previous, Pause/Resume, Stop, Next, Loop, Shuffle, Queue, Search, Volume
@@ -37,6 +38,7 @@
 | `/help` | Xem danh sách lệnh (có Select Menu) |
 | `/stats` | Xem thông tin bot |
 | `/ping` | Kiểm tra độ trễ |
+| `/lavalink` | Xem trạng thái các Lavalink nodes |
 
 ### 🏗️ Cấu trúc thư mục
 ```
@@ -91,19 +93,29 @@ npm install
 Copy `config.example.json` thành `config.json` và điền thông tin:
 ```json
 {
-  "token": "YOUR_BOT_TOKEN",
-  "clientId": "YOUR_CLIENT_ID",
-  "prefix": "!",
+  "app": {
+    "token": "YOUR_BOT_TOKEN",
+    "prefix": "!",
+    "clientId": 0
+  },
   "lavalink": {
     "nodes": [
       {
-        "name": "Main",
-        "host": "localhost",
-        "port": 2333,
+        "name": "Primary",
+        "url": "localhost:2333",
+        "auth": "youshallnotpass",
+        "secure": false
+      },
+      {
+        "name": "Secondary",
+        "url": "localhost:2334",
         "auth": "youshallnotpass",
         "secure": false
       }
     ]
+  },
+  "mongodb": {
+    "uri": "mongodb://localhost:27017/animal-music"
   }
 }
 ```
@@ -126,6 +138,48 @@ npm start
 ---
 
 ## 🔄 Changelog
+
+### v2.1.0 - Multi Lavalink Support (2025-12-22)
+
+#### ✨ Tính năng mới
+- ✅ Hỗ trợ nhiều Lavalink nodes (Primary + Secondary)
+- ✅ Failover tự động khi node bị disconnect
+- ✅ Lệnh `/lavalink` để xem trạng thái các nodes
+- ✅ Hiển thị thông tin Lavalink trong `/stats`
+- ✅ Reconnect tự động khi mất kết nối
+- ✅ Giảm log spam (chỉ hiện khi node ready)
+
+#### 📁 Files đã thay đổi
+| File | Thay đổi |
+|------|----------|
+| `config.example.json` | Thêm cấu hình multi nodes |
+| `src/types/index.ts` | Thêm `LavalinkNodeStatus` interface |
+| `src/services/MusicManager.ts` | Multi nodes + `getLavalinkNodesStatus()` |
+| `src/commands/info/lavalink.ts` | **MỚI** - Command xem nodes status |
+| `src/commands/info/stats.ts` | Thêm Lavalink section |
+| `README.md` | Cập nhật documentation |
+
+#### 🚀 Git Commit
+```bash
+# Add all changes
+git add config.example.json src/types/index.ts src/services/MusicManager.ts src/commands/info/lavalink.ts src/commands/info/stats.ts README.md
+
+# Commit
+git commit -m "feat: add multi Lavalink nodes support with failover
+
+- Add support for multiple Lavalink nodes configuration
+- Add automatic failover when node disconnects  
+- Add /lavalink command to check nodes status
+- Update /stats command with Lavalink section
+- Add LavalinkNodeStatus interface for monitoring
+- Add getLavalinkNodesStatus() function
+- Reduce log spam (only show successful connections)"
+
+# Push
+git push origin main
+```
+
+---
 
 ### v2.0.0 - Tsundere Cute Update
 - ✅ Tái cấu trúc thư mục commands theo danh mục

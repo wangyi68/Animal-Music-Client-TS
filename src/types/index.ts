@@ -26,6 +26,23 @@ export interface LavalinkNodeConfig {
     secure: boolean;
 }
 
+// Lavalink node status for monitoring
+export interface LavalinkNodeStatus {
+    name: string;
+    url: string;
+    state: 'CONNECTED' | 'DISCONNECTED' | 'CONNECTING' | 'RECONNECTING';
+    players: number;
+    cpu: number;
+    memory: {
+        used: number;
+        free: number;
+        allocated: number;
+        reservable: number;
+    };
+    uptime: number;
+    ping: number;
+}
+
 export interface LavalinkConfig {
     nodes: LavalinkNodeConfig[];
 }
