@@ -210,7 +210,7 @@ export function createCategoryEmbed(categories: string[], user: any, prefix: str
 
         const embed = new EmbedBuilder()
             .setAuthor({
-                name: `${icon} ${category.toUpperCase()} - ${categoryCommands.length} lệnh`,
+                name: `${category.toUpperCase()} - ${categoryCommands.length} lệnh`,
                 iconURL: user?.displayAvatarURL?.()
             })
             .setDescription(`Danh sách lệnh: ${commandList}`)
