@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import { removePlayerData } from '../../services/MusicManager.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'stop',
@@ -42,7 +43,7 @@ async function stopPlayer(
     if (!player) {
         const embedError = new EmbedBuilder()
             .setDescription(`> Dừng cái gì?! Đâu có gì đang phát đâu mà dừng!`)
-            .setColor(0xFF0000);
+            .setColor(COLORS.ERROR);
 
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
@@ -61,7 +62,7 @@ async function stopPlayer(
     const embed = new EmbedBuilder()
         .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
         .setDescription('Tớ đã tắt nhạc và rời đi rồi nè, bạn nhớ tớ thì lại gọi nha~')
-        .setColor(0xFF0000);
+        .setColor(COLORS.ERROR);
 
     if (interaction) {
         await interaction.reply({ embeds: [embed] });

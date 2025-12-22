@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'pause',
@@ -40,7 +41,7 @@ async function togglePause(
 
     if (!player) {
         const errorMsg = 'À mà! Chưa có nhạc nào đâu mà pause với resume!';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -51,7 +52,7 @@ async function togglePause(
 
     const embed = new EmbedBuilder()
         .setDescription(isPaused ? '> Tiếp tục phát nhạc rồi nè~' : '> Tạm dừng phát nhạc rồi nha!')
-        .setColor(0xFFC0CB);
+        .setColor(COLORS.MAIN);
 
     if (message) {
         await message.reply({ embeds: [embed] });

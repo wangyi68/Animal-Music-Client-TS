@@ -16,7 +16,8 @@
 - Loop (Tắt / Bài / Hàng chờ)
 - Shuffle ngẫu nhiên
 - Điều khiển âm lượng
-- **Hỗ trợ nhiều Lavalink nodes** với failover tự động
+- **Hỗ trợ Multi-Cluster** với failover tự động và cân bằng tải
+- Hiển thị Cluster xử lý track hiện tại
 
 ### 🎛️ Bảng điều khiển thông minh
 - **9 nút điều khiển**: Previous, Pause/Resume, Stop, Next, Loop, Shuffle, Queue, Search, Volume
@@ -38,7 +39,8 @@
 | `/help` | Xem danh sách lệnh (có Select Menu) |
 | `/stats` | Xem thông tin bot |
 | `/ping` | Kiểm tra độ trễ |
-| `/lavalink` | Xem trạng thái các Lavalink nodes |
+| `/lavalink` | Xem trạng thái các Clusters |
+| `/shard` | Xem thông tin Shard chi tiết |
 
 ### 🏗️ Cấu trúc thư mục
 ```
@@ -145,6 +147,29 @@ npm start
 ---
 
 ## 🔄 Changelog
+
+### v2.1.1 - Cluster & Embed Standardization (2025-12-22)
+
+#### ✨ Cải tiến giao diện & Tính năng
+- ✅ **Standardized Embeds**: Toàn bộ hệ thống tin nhắn chuyển sang sử dụng `EmbedBuilder`.
+- ✅ **Unified Color System**: Đồng bộ màu sắc hiển thị (Pink cho thông báo, Red cho lỗi).
+- ✅ **Cluster Support**: Đổi thuật ngữ "Node" thành "Cluster" để chuyên nghiệp hơn.
+- ✅ **Multi-Node Config**: Hỗ trợ config nhiều node linh hoạt (array hoặc object).
+- ✅ **Presence Stats**: Bot hiển thị thống kê Cluster (RAM, Players) trên status luân phiên.
+- ✅ **Enhanced Logs**: Log chi tiết Cluster nào đang xử lý bài hát.
+
+#### 📁 Files đã tham gia cập nhật
+| File | Thay đổi |
+|------|----------|
+| `src/services/MusicManager.ts` | Cluster name card, Embed color, Logs |
+| `src/commands/info/lavalink.ts` | Rename to Cluster, Embed color |
+| `src/commands/info/stats.ts` | Lavalink Dev Info section |
+| `src/handlers/MessageHandler.ts` | Force Embeds for all replies |
+| `src/utils/constants.ts` | Centralized COLORS constant |
+| `src/index.ts` | Cluster Stats Presence |
+| `package.json` | Bump version 2.1.1 |
+
+---
 
 ### v2.1.0 - Multi Lavalink Support (2025-12-22)
 

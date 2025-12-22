@@ -13,7 +13,7 @@ import { loadCommands } from './handlers/CommandHandler.js';
 import { handleMessage } from './handlers/MessageHandler.js';
 import { registerSlashCommands, handleSlashCommand, handleAutocomplete } from './handlers/SlashHandler.js';
 import { handleInteraction } from './handlers/InteractionHandler.js';
-import { createKazagumo } from './services/MusicManager.js';
+import { createKazagumo, getLavalinkNodesStatus } from './services/MusicManager.js';
 import { AnimalSync } from './services/AnimalSync.js';
 import type { Config, BotClient } from './types/index.js';
 
@@ -93,22 +93,44 @@ async function main(): Promise<void> {
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             },
             {
-                name: 'Spotify',
+                name: 'SoundCloud',
                 type: ActivityType.Streaming,
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             },
             {
-                name: 'SoundCloud',
+                name: 'Cluster Stats',
                 type: ActivityType.Streaming,
-                url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                url: 'https://www.youtube.com/watch?v=vkpcyY7Xe64',
             },
         ];
 
         let currentIndex = 0;
         const updatePresence = () => {
             if (client.user) {
+                const activity = activities[currentIndex];
+                let displayActivity: any = activity;
+
+                if (activity.name === 'Cluster Stats' && client.kazagumo) {
+                    const nodes = getLavalinkNodesStatus(client.kazagumo);
+                    const memoryUsage = nodes.reduce((acc, node) => acc + node.memory.used, 0);
+                    const totalPlayers = nodes.reduce((acc, node) => acc + node.players, 0);
+
+                    const formatBytes = (bytes: number) => {
+                        if (bytes === 0) return '0 B';
+                        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+                        return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
+                    };
+
+                    displayActivity = {
+                        name: `Cluster: ${nodes.length} | Play: ${totalPlayers} | RAM: ${formatBytes(memoryUsage)}`,
+                        type: ActivityType.Streaming,   
+                        url: 'https://www.youtube.com/watch?v=vkpcyY7Xe64',
+                    };
+                }
+
                 client.user.setPresence({
-                    activities: [activities[currentIndex]],
+                    activities: [displayActivity],
                     status: 'online'
                 });
                 currentIndex = (currentIndex + 1) % activities.length;

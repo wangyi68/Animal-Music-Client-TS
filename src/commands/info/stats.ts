@@ -5,6 +5,7 @@ import { getLavalinkNodesStatus } from '../../services/MusicManager.js';
 import moment from 'moment';
 import 'moment-duration-format';
 import os from 'os';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'stats',
@@ -70,7 +71,7 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
             iconURL: client.user?.displayAvatarURL()
         })
         .setThumbnail(client.user?.displayAvatarURL() || null)
-        .setColor(0xFFC0CB)
+        .setColor(COLORS.MAIN)
         .setDescription(
             `> Bot âm nhạc được phát triển với tất cả tình yêu~\n\n` +
             `### Thông tin Bot`
@@ -154,14 +155,14 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
                 inline: true
             },
             {
-                name: '> Lavalink Nodes',
+                name: '> Lavalink Dev Status',
                 value: `\`${lavalinkStatus}\``,
                 inline: true
             }
         )
         .addFields({
             name: '\u200b',
-            value: `### Lavalink Status`,
+            value: `### Lavalink Dev Info`,
             inline: false
         })
         .addFields(

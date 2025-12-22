@@ -4,11 +4,12 @@ import type { Command, CommandContext, CommandResult, BotClient, SlashCommandCon
 import { getLavalinkNodesStatus } from '../../services/MusicManager.js';
 import moment from 'moment';
 import 'moment-duration-format';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'lavalink',
-    description: 'Xem trạng thái các Lavalink node (Owner only)',
-    aliases: ['nodes', 'lavanodes', 'nodeinfo'],
+    description: 'Xem trạng thái các Cluster',
+    aliases: ['nodes', 'cluster', 'clusters'],
     config: createCommandConfig({
         category: 'info',
         usage: 'lavalink',
@@ -30,7 +31,7 @@ const command: Command = {
             await message.reply({
                 embeds: [
                     new EmbedBuilder()
-                        .setColor(0xFF6B6B)
+                        .setColor(COLORS.ERROR)
                         .setDescription('> ❌ Lệnh này chỉ dành cho **Owner Bot** thôi nha!')
                 ]
             });
@@ -53,7 +54,7 @@ const command: Command = {
             await interaction.reply({
                 embeds: [
                     new EmbedBuilder()
-                        .setColor(0xFF6B6B)
+                        .setColor(COLORS.ERROR)
                         .setDescription('> ❌ Lệnh này chỉ dành cho **Owner Bot** thôi nha!')
                 ],
                 ephemeral: true
@@ -73,29 +74,29 @@ async function createLavalinkEmbed(client: BotClient): Promise<EmbedBuilder> {
 
     const embed = new EmbedBuilder()
         .setAuthor({
-            name: `Trạng thái Lavalink Nodes`,
+            name: `Trạng thái System Clusters`,
             iconURL: client.user?.displayAvatarURL()
         })
-        .setColor(0xFFC0CB)
+        .setColor(COLORS.MAIN)
         .setThumbnail(client.user?.displayAvatarURL() || null);
 
     if (nodes.length === 0) {
-        embed.setDescription('> ⚠️ Không tìm thấy Lavalink node nào được cấu hình!');
+        embed.setDescription('> ⚠️ Không tìm thấy Cluster nào được cấu hình!');
     } else {
         // Summary stats
         const connectedNodes = nodes.filter(n => n.state === 'CONNECTED').length;
         const totalPlayers = nodes.reduce((acc, n) => acc + n.players, 0);
         const statusText = connectedNodes === nodes.length
             ? '✅ Tất cả hoạt động'
-            : '⚠️ Có node offline';
+            : '⚠️ Có Cluster offline';
 
         // Build description with summary
-        let description = `> Đang theo dõi **${nodes.length}** Lavalink nodes\n\n`;
+        let description = `> Đang theo dõi **${nodes.length}** Clusters\n\n`;
         description += `**📊 Tổng quan**\n`;
-        description += `┌ **Nodes:** \`${connectedNodes}/${nodes.length}\` online\n`;
+        description += `┌ **Clusters:** \`${connectedNodes}/${nodes.length}\` online\n`;
         description += `├ **Players:** \`${totalPlayers}\` đang hoạt động\n`;
         description += `└ **Trạng thái:** ${statusText}\n\n`;
-        description += `**🖥️ Chi tiết Nodes**`;
+        description += `**🖥️ Chi tiết Cluster**`;
 
         embed.setDescription(description);
 
@@ -127,7 +128,7 @@ async function createLavalinkEmbed(client: BotClient): Promise<EmbedBuilder> {
     }
 
     embed.setFooter({
-        text: 'Animal Music • Lavalink Status',
+        text: 'Animal Music • Cluster Status',
         iconURL: client.user?.displayAvatarURL()
     })
         .setTimestamp();

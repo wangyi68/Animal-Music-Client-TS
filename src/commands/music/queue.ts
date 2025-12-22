@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'queue',
@@ -47,7 +48,7 @@ async function showQueue(
 
     if (!player || !player.queue.current) {
         const errorMsg = 'Làm gì có nhạc nào đang phát đâu mà xem! Bật nhạc đi rồi tớ mới show cho~';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -80,7 +81,7 @@ async function showQueue(
         .setAuthor({ name: 'HÀNG CHỜ HIỆN TẠI NÈ~' })
         .setDescription(description)
         .setFooter({ text: `Trang ${currentPage}/${maxPages} • Có tổng cộng ${tracks.length} bài lận đó` })
-        .setColor(0xFFC0CB);
+        .setColor(COLORS.MAIN);
 
     if (message) {
         await message.reply({ embeds: [embed] });

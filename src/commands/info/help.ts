@@ -8,6 +8,7 @@ import {
 import { createCommandConfig, commands } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
 import { smartDelete } from '../../utils/messageAutoDelete.js';
+import { COLORS } from '../../utils/constants.js';
 
 // Category emoji IDs (for select menu - format: { id, animated })
 const CATEGORY_EMOJIS: Record<string, { id: string; animated: boolean }> = {
@@ -129,7 +130,7 @@ async function showHelp(
                 text: `Prefix: ${prefix} • Hỗ trợ cả prefix và slash commands`,
                 iconURL: user?.displayAvatarURL?.()
             })
-            .setColor(0xFFC0CB)
+            .setColor(COLORS.MAIN)
             .setTimestamp();
 
         if (message) {
@@ -150,7 +151,7 @@ async function showHelp(
         const errorMsg = `Không tìm thấy lệnh: **${commandName}**`;
         const embedError = new EmbedBuilder()
             .setDescription(`> ${errorMsg}`)
-            .setColor(0xFF0000);
+            .setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -219,7 +220,7 @@ export function createCategoryEmbed(categories: string[], user: any, prefix: str
                 text: `Prefix: ${prefix}`,
                 iconURL: user?.displayAvatarURL?.()
             })
-            .setColor(0xFFC0CB)
+            .setColor(COLORS.MAIN)
             .setTimestamp();
 
         embeds.push(embed);

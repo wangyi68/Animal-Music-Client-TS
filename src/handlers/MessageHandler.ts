@@ -11,6 +11,7 @@ import {
     smartDelete,
     MessageType
 } from '../utils/messageAutoDelete.js';
+import { COLORS } from '../utils/constants.js';
 
 const logger = createLogger('MessageHandler');
 
@@ -103,7 +104,8 @@ async function processCommand(context: CommandContext, _config: Config): Promise
     if (command.config.voiceChannel || command.config.category === 'music') {
         const memberVoice = context.message.member?.voice?.channel;
         if (!memberVoice) {
-            await tempReply(context.message, 'Vào phòng Voice đi rồi tớ mới chiều!');
+            const embed = new EmbedBuilder().setDescription('> Vào phòng Voice đi rồi tớ mới chiều!').setColor(COLORS.ERROR);
+            await tempReply(context.message, embed);
             return;
         }
     }
@@ -115,7 +117,8 @@ async function processCommand(context: CommandContext, _config: Config): Promise
         command.config.cooldown
     );
     if (cooldownRemaining !== null) {
-        await tempReply(context.message, `Bình tĩnh nào! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi~`);
+        const embed = new EmbedBuilder().setDescription(`> Bình tĩnh nào! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi~`).setColor(COLORS.MAIN);
+        await tempReply(context.message, embed);
         return;
     }
 
@@ -126,7 +129,8 @@ async function processCommand(context: CommandContext, _config: Config): Promise
         command.config.requireBotPermissions
     );
     if (!permCheck.valid) {
-        await tempReply(context.message, `Thiếu quyền **${permCheck.missing.join(', ')}** rồi kìa!`);
+        const embed = new EmbedBuilder().setDescription(`> Thiếu quyền **${permCheck.missing.join(', ')}** rồi kìa!`).setColor(COLORS.ERROR);
+        await tempReply(context.message, embed);
         return;
     }
 
@@ -147,13 +151,16 @@ function handleCommandResult(result: CommandResult, context: CommandContext, con
             sendErrorEmbed(context.message, result.message);
             break;
         case 'invalidArguments':
-            tempReply(context.message, `Sai cách dùng lệnh rồi! Dùng đúng thế này nè: \`${config.usage}\``);
+            const embedArg = new EmbedBuilder().setDescription(`> Sai cách dùng lệnh rồi! Dùng đúng thế này nè: \`${config.usage}\``).setColor(COLORS.ERROR);
+            tempReply(context.message, embedArg);
             break;
         case 'insufficientPermissions':
-            tempReply(context.message, 'Bạn không có quyền dùng lệnh này đâu!');
+            const embedPerm = new EmbedBuilder().setDescription('> Bạn không có quyền dùng lệnh này đâu!').setColor(COLORS.ERROR);
+            tempReply(context.message, embedPerm);
             break;
         case 'cooldown':
-            tempReply(context.message, `Bình tĩnh nào! Đợi **${result.remainingTime}s** nữa đi~`);
+            const embedCool = new EmbedBuilder().setDescription(`> Bình tĩnh nào! Đợi **${result.remainingTime}s** nữa đi~`).setColor(COLORS.MAIN);
+            tempReply(context.message, embedCool);
             break;
     }
 }
@@ -164,7 +171,7 @@ async function sendBotInfo(message: Message, config: Config): Promise<void> {
             `Chào~ Mình là bot âm nhạc Animal Music nè, prefix của mình là \`${config.app.prefix}\` hoặc là mention tớ để dùng lệnh nha.\n` +
             `Sử dụng \`${config.app.prefix}help\` để biết toàn bộ lệnh của tớ nha~`
         )
-        .setColor(0xFFC0CB)
+        .setColor(COLORS.MAIN)
         .setFooter({
             text: 'Music comes first, love follows',
             iconURL: message.client.user?.displayAvatarURL()
@@ -176,7 +183,7 @@ async function sendBotInfo(message: Message, config: Config): Promise<void> {
 async function sendErrorEmbed(message: Message, error: string): Promise<void> {
     const embed = new EmbedBuilder()
         .setDescription(`Có lỗi xảy ra rồi nè: \n\`\`\`\n${error.slice(0, 2000)}\n\`\`\``)
-        .setColor(0xFF0000);
+        .setColor(COLORS.ERROR);
 
     const reply = await message.reply({ embeds: [embed] });
     // Sử dụng smart delete - lỗi dài cần thời gian đọc hơn
@@ -187,11 +194,11 @@ async function sendErrorEmbed(message: Message, error: string): Promise<void> {
 }
 
 export async function tempReply(message: Message, content: string | EmbedBuilder, delay?: number): Promise<void> {
-    const options = typeof content === 'string'
-        ? { content }
-        : { embeds: [content] };
+    const embed = typeof content === 'string'
+        ? new EmbedBuilder().setDescription(`> ${content}`).setColor(COLORS.MAIN)
+        : content;
 
-    const reply = await message.reply(options);
+    const reply = await message.reply({ embeds: [embed] });
 
     // Nếu có delay cụ thể, sử dụng nó; nếu không, tính toán thông minh
     if (delay !== undefined) {

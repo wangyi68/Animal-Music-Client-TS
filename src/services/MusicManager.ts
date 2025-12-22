@@ -9,6 +9,7 @@ import { createLogger } from '../utils/logger.js';
 import type { Config, LoopMode, PlayerSyncData, LavalinkNodeStatus } from '../types/index.js';
 import { AnimalSync } from './AnimalSync.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
+import { COLORS } from '../utils/constants.js';
 
 const logger = createLogger('MusicManager');
 
@@ -23,13 +24,26 @@ interface ExtendedPlayerData {
 const playerDataMap = new Map<string, ExtendedPlayerData>();
 
 export function createKazagumo(client: Client, config: Config): Kazagumo {
-    // Use all configured nodes instead of just the first one
-    const nodes = config.lavalink.nodes.map(node => ({
+    // Support both array (multiple nodes) and single object (legacy config)
+    let configNodes: any[] = [];
+
+    if (Array.isArray(config.lavalink.nodes)) {
+        configNodes = config.lavalink.nodes;
+    } else if (typeof config.lavalink.nodes === 'object' && config.lavalink.nodes !== null) {
+        logger.warn('config.lavalink.nodes is a single object. Converting to array for compatibility.');
+        configNodes = [config.lavalink.nodes];
+    } else {
+        logger.warn('config.lavalink.nodes is invalid! Defaulting to empty array.');
+    }
+
+    const nodes = configNodes.map(node => ({
         name: node.name,
         url: node.url,
         auth: node.auth,
         secure: node.secure
     }));
+
+    logger.info(`Initializing Cluster with ${nodes.length} nodes...`);
 
     const kazagumo = new Kazagumo({
         defaultSearchEngine: 'youtube_music',
@@ -47,7 +61,7 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
 
     // Event handlers - Only log when node is ready (successful connection)
     kazagumo.shoukaku.on('ready', (name: string) => {
-        logger.info(`Node '${name}' is ready!`);
+        logger.info(`Cluster '${name}' is ready!`);
     });
 
     // Silent handlers for error/close/disconnect/reconnecting to avoid log spam
@@ -103,7 +117,7 @@ export function getLavalinkNodesStatus(kazagumo: Kazagumo): LavalinkNodeStatus[]
 }
 
 function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: Client): void {
-    logger.info(`Track started: ${track.title}`);
+    logger.info(`Cluster: ${player.shoukaku.node.name} Track started: ${track.title}`);
 
     const data = getPlayerData(player.guildId);
     if (!data?.textChannelId) return;
@@ -120,7 +134,8 @@ function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: 
         data.lastMessageId = null;
     }
 
-    const embed = createCompactEmbed(track, client.user?.displayAvatarURL() || undefined, player.queue.size);
+    const nodeName = player.shoukaku.node.name;
+    const embed = createCompactEmbed(track, client.user?.displayAvatarURL() || undefined, player.queue.size, nodeName);
 
     channel.send({ embeds: [embed], components: components })
         .then(msg => {
@@ -176,12 +191,12 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
 
     const embed = new EmbedBuilder()
         .setDescription(`> Hết nhạc rồi nè~ Muốn nghe nữa thì thêm bài vào đi nha!`)
-        .setColor(0xFFC0CB);
+        .setColor(COLORS.MAIN);
 
     channel.send({ embeds: [embed] }).catch(() => { });
 }
 
-function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSize?: number): EmbedBuilder {
+function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSize?: number, nodeName?: string): EmbedBuilder {
     const minutes = Math.floor((track.length || 0) / 60000);
     const seconds = Math.floor(((track.length || 0) % 60000) / 1000);
     const duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -193,7 +208,7 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSi
         : 'Hàng chờ trống rồi...';
 
     return new EmbedBuilder()
-        .setColor(0xFFC0CB) // Pink Main Color
+        .setColor(COLORS.MAIN)
         .setAuthor({
             name: `Đang phát cho bạn nghe nè~`,
             iconURL: botAvatarUrl
@@ -205,7 +220,8 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSi
         .addFields(
             { name: '<a:Loading:1452376829062283478> **Thời lượng**', value: `\`${duration}\``, inline: true },
             { name: '<a:xoayxoat:1444329766600708258> **Yêu cầu bởi**', value: `\`${authorName}\``, inline: true },
-            { name: '<:guranote:1444001458600022179> **Hàng chờ**', value: `\`${queueSize || 0} bài\``, inline: true }
+            { name: '<:guranote:1444001458600022179> **Hàng chờ**', value: `\`${queueSize || 0} bài\``, inline: true },
+            { name: '<a:li:1444329999971651787> **Cluster**', value: `\`${nodeName || 'Unknown'}\``, inline: true }
         )
         .setFooter({
             text: `Animal Music • ${queueInfo}`,

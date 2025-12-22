@@ -1,9 +1,10 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { table } from 'table';
 import moment from 'moment';
 import 'moment-duration-format';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'shard',
@@ -24,7 +25,11 @@ const command: Command = {
         const client = message.client as BotClient;
         const tableResult = await getShardInfo(client);
 
-        await message.reply(`\`\`\`asciidoc\n${tableResult}\n\`\`\``);
+        const embed = new EmbedBuilder()
+            .setDescription(`\`\`\`asciidoc\n${tableResult}\n\`\`\``)
+            .setColor(COLORS.MAIN);
+
+        await message.reply({ embeds: [embed] });
         return { type: 'success' };
     },
 
@@ -35,7 +40,11 @@ const command: Command = {
         await interaction.deferReply();
         const tableResult = await getShardInfo(client);
 
-        await interaction.editReply(`\`\`\`asciidoc\n${tableResult}\n\`\`\``);
+        const embed = new EmbedBuilder()
+            .setDescription(`\`\`\`asciidoc\n${tableResult}\n\`\`\``)
+            .setColor(COLORS.MAIN);
+
+        await interaction.editReply({ embeds: [embed] });
         return { type: 'success' };
     }
 };
@@ -86,11 +95,6 @@ async function getShardInfo(client: BotClient): Promise<string> {
         totalMembers += res[2];
         totalRam += res[6];
         totalHRam += res[7];
-
-        // Format uptime for each shard if needed, but sample code leaves it empty in loop except valid uptime?
-        // Sample code: j[5] + 'ms' -> ping. j[0] -> SID.
-        // Sample says: data.push([j[0], j[1]..., '', j[5] + 'ms'...]) -> Uptime column is empty in rows?
-        // Let's verify sample: `data.push([j[0], ..., '', ...])`. Yes, UpTime is empty string in rows.
 
         data.push([
             res[0],

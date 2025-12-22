@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'skip',
@@ -40,7 +41,7 @@ async function skipTrack(
 
     if (!player) {
         const errorMsg = 'Hảả?! Làm gì có nhạc nào đang phát đâu mà skip!';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -51,7 +52,7 @@ async function skipTrack(
 
     const embed = new EmbedBuilder()
         .setDescription(`> Tớ đã bỏ qua **${currentTrack?.title || 'bài hát'}** rồi nha~`)
-        .setColor(0xFFC0CB);
+        .setColor(COLORS.MAIN);
 
     if (message) {
         await message.reply({ embeds: [embed] });

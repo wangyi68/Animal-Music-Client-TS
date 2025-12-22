@@ -2,6 +2,7 @@ import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from 'discord.
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import { setGuildPrefix } from '../../database/index.js';
 import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
 
 const command: Command = {
     name: 'prefix',
@@ -44,7 +45,7 @@ async function changePrefix(
 ): Promise<CommandResult> {
     if (newPrefix.length > 5) {
         const errorMsg = 'Prefix không được dài quá **5 ký tự** nha!';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -54,7 +55,7 @@ async function changePrefix(
 
     if (!success) {
         const errorMsg = 'Không thể thay đổi prefix rồi nè!';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -62,7 +63,7 @@ async function changePrefix(
 
     const embed = new EmbedBuilder()
         .setDescription(`> Tớ đã thay đổi prefix thành **\`${newPrefix}\`** rồi nha!`)
-        .setColor(0x00FF00);
+        .setColor(COLORS.SUCCESS);
 
     if (message) {
         await message.reply({ embeds: [embed] });

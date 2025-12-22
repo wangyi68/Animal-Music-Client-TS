@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import { setLoopMode, getLoopMode } from '../../services/MusicManager.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext, LoopMode } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
 
 const LOOP_MODES = ['Tắt', 'Bài hát', 'Hàng chờ'];
 
@@ -55,7 +56,7 @@ async function toggleLoop(
 
     if (!player) {
         const errorMsg = 'Loop cái gì khi chưa có nhạc vậy hả?!';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(0xFF0000);
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
         else if (message) await message.reply({ embeds: [embedError] });
         return { type: 'error', message: errorMsg };
@@ -79,7 +80,7 @@ async function toggleLoop(
 
     const embed = new EmbedBuilder()
         .setDescription(`Đã chuyển chế độ lặp sang: **${LOOP_MODES[newMode]}** nha~`)
-        .setColor(0xFFC0CB);
+        .setColor(COLORS.MAIN);
 
     if (message) {
         await message.reply({ embeds: [embed] });
