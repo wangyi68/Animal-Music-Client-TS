@@ -9,8 +9,9 @@ import {
 } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
-import { COLORS, EMOJIS } from '../../utils/constants.js';
+import { COLORS } from '../../utils/constants.js';
 import { setPlayerData } from '../../services/MusicManager.js';
+import { smartDelete, DeletePresets } from '../../utils/messageAutoDelete.js';
 
 export default {
     name: 'play',
@@ -157,11 +158,11 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
         }
 
         if (isInteraction) {
-            await context.editReply({ embeds: [embed] })
-                .then((msg: any) => setTimeout(() => msg.delete().catch(() => { }), 10000));
+            const msg = await context.editReply({ embeds: [embed] });
+            smartDelete(msg, DeletePresets.TRACK_ADDED);
         } else {
-            await context.reply({ embeds: [embed] })
-                .then((msg: any) => setTimeout(() => msg.delete().catch(() => { }), 10000));
+            const msg = await context.reply({ embeds: [embed] });
+            smartDelete(msg, DeletePresets.TRACK_ADDED);
         }
 
         return { type: 'success' };

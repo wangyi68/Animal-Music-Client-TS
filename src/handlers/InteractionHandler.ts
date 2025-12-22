@@ -11,15 +11,13 @@ import {
     MessageFlags,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
-    ButtonStyle,
     ButtonBuilder,
     ComponentType,
     TextChannel
 } from 'discord.js';
-import { createLogger } from '../utils/logger.js';
 import { setLoopMode, getLoopMode, setPlayerData } from '../services/MusicManager.js';
 import type { BotClient, LoopMode } from '../types/index.js';
-import { COLORS, EMOJIS } from '../utils/constants.js';
+import { COLORS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
 import {
     smartDelete,
@@ -27,7 +25,7 @@ import {
     DeletePresets
 } from '../utils/messageAutoDelete.js';
 
-const logger = createLogger('InteractionHandler');
+
 
 function isValidUrl(string: string): boolean {
     try {
@@ -38,7 +36,7 @@ function isValidUrl(string: string): boolean {
     }
 }
 
-export async function handleInteraction(interaction: Interaction, config: any): Promise<void> {
+export async function handleInteraction(interaction: Interaction, _config: any): Promise<void> {
     if (interaction.isButton()) {
         await handleButton(interaction);
     } else if (interaction.isStringSelectMenu()) {

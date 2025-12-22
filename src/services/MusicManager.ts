@@ -4,16 +4,10 @@ import {
     Client,
     TextChannel,
     EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder
 } from 'discord.js';
 import { createLogger } from '../utils/logger.js';
 import type { Config, LoopMode, PlayerSyncData, LavalinkNodeStatus } from '../types/index.js';
 import { AnimalSync } from './AnimalSync.js';
-import { EMOJIS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
 
 const logger = createLogger('MusicManager');

@@ -24,7 +24,6 @@ export class AnimalSync {
 
     private hubConnection: HubConnection;
     private pendingEvents: PendingEvent[] = [];
-    private isReconnecting = false;
     private retryAttempt = 0;
     private readonly RETRY_DELAYS = [0, 2000, 5000, 10000, 30000];
     private readonly MAX_RETRY_ATTEMPTS = -1; // -1 = infinite
@@ -77,7 +76,6 @@ export class AnimalSync {
         this.hubConnection.on('connection', (message: string) => {
             this.clientConnectionId = message;
             this.retryAttempt = 0;
-            this.isReconnecting = false;
             this.processPendingEvents();
             logger.info(`Connected with ID: ${message}`);
         });
@@ -101,12 +99,10 @@ export class AnimalSync {
 
         this.hubConnection.onreconnecting((error) => {
             logger.warn(`Reconnecting... ${error?.message || ''}`);
-            this.isReconnecting = true;
         });
 
         this.hubConnection.onreconnected((connectionId) => {
             logger.info(`Reconnected with ID: ${connectionId}`);
-            this.isReconnecting = false;
             this.processPendingEvents();
         });
     }
@@ -142,10 +138,8 @@ export class AnimalSync {
 
         try {
             logger.info('Attempting to connect...');
-            this.isReconnecting = true;
             await this.hubConnection.start();
             logger.info('Connected successfully');
-            this.isReconnecting = false;
             this.retryAttempt = 0;
             this.processPendingEvents();
         } catch (error) {
@@ -157,7 +151,6 @@ export class AnimalSync {
     private startReconnecting(): void {
         if (this.MAX_RETRY_ATTEMPTS !== -1 && this.retryAttempt >= this.MAX_RETRY_ATTEMPTS) {
             logger.warn('Maximum retry attempts reached');
-            this.isReconnecting = false;
             return;
         }
 
@@ -223,7 +216,6 @@ export class AnimalSync {
 
     public async dispose(): Promise<void> {
         this.pendingEvents = [];
-        this.isReconnecting = false;
 
         try {
             await this.hubConnection.stop();

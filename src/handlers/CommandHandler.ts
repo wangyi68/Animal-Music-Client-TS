@@ -2,7 +2,7 @@ import { Collection, PermissionResolvable } from 'discord.js';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 import { createLogger } from '../utils/logger.js';
-import type { Command, CommandConfig, CommandContext, CommandResult } from '../types/index.js';
+import type { Command, CommandConfig, CommandContext } from '../types/index.js';
 
 const logger = createLogger('CommandHandler');
 

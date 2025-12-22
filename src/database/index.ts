@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { createLogger } from '../utils/logger.js';
 import type { GuildDocument, PrefixDocument, Config } from '../types/index.js';
 

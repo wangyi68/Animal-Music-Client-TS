@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { createCommandConfig, commands } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
+import { smartDelete } from '../../utils/messageAutoDelete.js';
 
 // Category emoji IDs (for select menu - format: { id, animated })
 const CATEGORY_EMOJIS: Record<string, { id: string; animated: boolean }> = {
@@ -133,8 +134,8 @@ async function showHelp(
 
         if (message) {
             const reply = await message.reply({ embeds: [embed], components: [row] });
-            // Auto delete after 5 minutes
-            setTimeout(() => reply.delete().catch(() => { }), 5 * 60 * 1000);
+            // Auto delete after 5 minutes - use IMPORTANT type equivalent with override
+            smartDelete(reply, { overrideTimeout: 5 * 60 * 1000 });
         } else if (interaction) {
             await interaction.reply({ embeds: [embed], components: [row] });
         }

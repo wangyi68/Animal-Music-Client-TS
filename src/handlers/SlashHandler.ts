@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import { createLogger } from '../utils/logger.js';
 import { commands, checkCooldown } from './CommandHandler.js';
-import type { Config, SlashCommandContext, CommandResult, BotClient } from '../types/index.js';
+import type { Config, SlashCommandContext, CommandResult } from '../types/index.js';
 import { COLORS } from '../utils/constants.js';
 
 const logger = createLogger('SlashHandler');
@@ -118,7 +118,7 @@ export async function registerSlashCommands(config: Config, clientId?: string): 
 // Handle slash command interaction
 export async function handleSlashCommand(
     interaction: ChatInputCommandInteraction,
-    config: Config
+    _config: Config
 ): Promise<void> {
     const command = commands.get(interaction.commandName);
 
@@ -171,7 +171,7 @@ export async function handleSlashCommand(
             }
 
             // Convert slash options to args for prefix command handler
-            const args = extractArgsFromInteraction(interaction);
+            extractArgsFromInteraction(interaction);
 
             // Legacy support (not fully implemented here as we prefer strict slash handlers)
             const embed = new EmbedBuilder()
@@ -225,7 +225,7 @@ function extractArgsFromInteraction(interaction: ChatInputCommandInteraction): s
 async function handleSlashResult(
     interaction: ChatInputCommandInteraction,
     result: CommandResult,
-    config: any
+    _config: any
 ): Promise<void> {
     switch (result.type) {
         case 'success':

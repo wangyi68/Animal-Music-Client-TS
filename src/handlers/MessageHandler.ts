@@ -6,12 +6,10 @@ import {
     checkCooldown,
     checkPermissions
 } from './CommandHandler.js';
-import { AnimalSync } from '../services/AnimalSync.js';
 import type { Config, CommandContext, CommandResult } from '../types/index.js';
 import {
     smartDelete,
-    MessageType,
-    DeletePresets
+    MessageType
 } from '../utils/messageAutoDelete.js';
 
 const logger = createLogger('MessageHandler');
@@ -91,7 +89,7 @@ async function determinePrefix(message: Message, config: Config): Promise<{ pref
     return { prefix: null, isMentionPrefix: false };
 }
 
-async function processCommand(context: CommandContext, config: Config): Promise<void> {
+async function processCommand(context: CommandContext, _config: Config): Promise<void> {
     const commandName = context.message.content
         .slice(context.prefix.length)
         .trim()

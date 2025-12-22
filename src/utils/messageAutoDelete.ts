@@ -1,4 +1,4 @@
-import { Message, InteractionResponse, MessageFlags } from 'discord.js';
+import { Message, InteractionResponse } from 'discord.js';
 
 /**
  * Loại message để xác định thời gian xóa phù hợp
