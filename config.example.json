@@ -1,0 +1,24 @@
+{
+    "app": {
+        "token": "",
+        "prefix": "!",
+        "clientId": 0
+    },
+    "lavalink": {
+        "nodes": [
+            {
+                "name": "Localhost",
+                "url": "localhost:2333",
+                "auth": "youshallnotpass",
+                "secure": false
+            }
+        ]
+    },
+    "mongodb": {
+        "uri": "mongodb://localhost:27017/animal-music"
+    },
+    "websocket": {
+        "url": "",
+        "secret": ""
+    }
+}
