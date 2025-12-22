@@ -151,3 +151,4 @@ function getStatusEmoji(state: LavalinkNodeStatus['state']): string {
 }
 
 export default command;
+

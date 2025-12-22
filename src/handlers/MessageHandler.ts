@@ -8,6 +8,11 @@ import {
 } from './CommandHandler.js';
 import { AnimalSync } from '../services/AnimalSync.js';
 import type { Config, CommandContext, CommandResult } from '../types/index.js';
+import {
+    smartDelete,
+    MessageType,
+    DeletePresets
+} from '../utils/messageAutoDelete.js';
 
 const logger = createLogger('MessageHandler');
 
@@ -176,14 +181,28 @@ async function sendErrorEmbed(message: Message, error: string): Promise<void> {
         .setColor(0xFF0000);
 
     const reply = await message.reply({ embeds: [embed] });
-    setTimeout(() => reply.delete().catch(() => { }), 20000);
+    // Sử dụng smart delete - lỗi dài cần thời gian đọc hơn
+    smartDelete(reply, {
+        type: MessageType.ERROR,
+        contentLength: error.length
+    });
 }
 
-export async function tempReply(message: Message, content: string | EmbedBuilder, delay = 10000): Promise<void> {
+export async function tempReply(message: Message, content: string | EmbedBuilder, delay?: number): Promise<void> {
     const options = typeof content === 'string'
         ? { content }
         : { embeds: [content] };
 
     const reply = await message.reply(options);
-    setTimeout(() => reply.delete().catch(() => { }), delay);
+
+    // Nếu có delay cụ thể, sử dụng nó; nếu không, tính toán thông minh
+    if (delay !== undefined) {
+        smartDelete(reply, { overrideTimeout: delay });
+    } else {
+        const contentLength = typeof content === 'string' ? content.length : 100;
+        smartDelete(reply, {
+            type: MessageType.SUCCESS,
+            contentLength
+        });
+    }
 }

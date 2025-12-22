@@ -21,6 +21,11 @@ import { setLoopMode, getLoopMode, setPlayerData } from '../services/MusicManage
 import type { BotClient, LoopMode } from '../types/index.js';
 import { COLORS, EMOJIS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
+import {
+    smartDelete,
+    MessageType,
+    DeletePresets
+} from '../utils/messageAutoDelete.js';
 
 const logger = createLogger('InteractionHandler');
 
@@ -84,7 +89,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     const isRequester = !requester || requester?.id === interaction.user.id;
 
     // For certain actions, check if user is the requester or has permission
-    const restrictedActions = ['stop', 'clear_btn'];
+    const restrictedActions = ['stop', 'clear_btn', 'loop', 'shuffle', 'pause_resume', 'skip', 'prev', 'next', 'volume'];
     if (restrictedActions.includes(customId) && !isRequester) {
         const member = interaction.member as any;
         const hasPermission = member?.permissions?.has?.('ManageGuild');
@@ -94,8 +99,8 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
                 .setAuthor({ name: 'Hảả?! Mấy cái nút này không phải của bạn!' })
                 .setDescription(`> Bài hát này là yêu cầu của: ${requester?.toString?.() || 'Không rõ'}`)
                 .setColor(COLORS.ERROR);
-            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
-            setTimeout(() => interaction.deleteReply().catch(() => { }), 10000);
+            const reply = await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+            smartDelete(reply, DeletePresets.NO_PERMISSION);
             return;
         }
     }
@@ -128,8 +133,8 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
             const embedStop = new EmbedBuilder().setDescription('Đã dừng nhạc nè~').setColor(COLORS.MAIN);
             const channel = interaction.channel as TextChannel;
             if (channel) {
-                await channel.send({ embeds: [embedStop] })
-                    .then((msg: any) => setTimeout(() => msg.delete().catch(() => { }), 10000));
+                const msg = await channel.send({ embeds: [embedStop] });
+                smartDelete(msg, DeletePresets.MUSIC_STOPPED);
             }
             return;
 
@@ -279,10 +284,8 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promi
             )
             .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 
-        await interaction.editReply({ embeds: [embed], components: [] })
-            .then((msg: any) => {
-                setTimeout(() => msg.delete().catch(() => { }), 10000);
-            });
+        const msg = await interaction.editReply({ embeds: [embed], components: [] });
+        smartDelete(msg, DeletePresets.TRACK_ADDED);
         return;
     }
 
@@ -393,10 +396,12 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
                     );
             }
 
-            await interaction.editReply({ embeds: [embed] })
-                .then((msg: any) => {
-                    setTimeout(() => msg.delete().catch(() => { }), 10000);
-                });
+            const msgResult = await interaction.editReply({ embeds: [embed] });
+            smartDelete(msgResult, {
+                type: MessageType.SUCCESS,
+                contentLength: 200,
+                fieldsCount: 2
+            });
         } else {
             const tracks = result.tracks.slice(0, 10);
             const options = tracks.map((track, index) =>
@@ -419,10 +424,8 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
                 .setColor(COLORS.MAIN)
                 .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: interaction.user.displayAvatarURL() });
 
-            await interaction.editReply({ embeds: [embed], components: [row] })
-                .then((msg: any) => {
-                    setTimeout(() => msg.delete().catch(() => { }), 30000); // Give user more time to select
-                });
+            const searchMsg = await interaction.editReply({ embeds: [embed], components: [row] });
+            smartDelete(searchMsg, DeletePresets.SEARCH_RESULTS);
         }
     }
 }
