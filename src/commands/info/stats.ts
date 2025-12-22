@@ -6,6 +6,7 @@ import moment from 'moment';
 import 'moment-duration-format';
 import os from 'os';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'stats',
@@ -25,7 +26,8 @@ const command: Command = {
         const { message } = context;
         const client = message.client as BotClient;
         const embed = await createStatsEmbed(client, context.prefix);
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO, fieldsCount: 20 });
         return { type: 'success' };
     },
 
@@ -34,7 +36,8 @@ const command: Command = {
         const client = interaction.client as BotClient;
         await interaction.deferReply();
         const embed = await createStatsEmbed(client, '/');
-        await interaction.editReply({ embeds: [embed] });
+        const msg = await interaction.editReply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO, fieldsCount: 20 });
         return { type: 'success' };
     }
 };
@@ -73,8 +76,8 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
         .setThumbnail(client.user?.displayAvatarURL() || null)
         .setColor(COLORS.MAIN)
         .setDescription(
-            `> Bot âm nhạc được phát triển với tất cả tình yêu~\n\n` +
-            `### Thông tin Bot`
+            `> Bot âm nhạc siêu cấp vũ trụ đây! Đừng có mà mê tớ nha~\n\n` +
+            `**Thông tin Bot**`
         )
         .addFields(
             {
@@ -110,7 +113,7 @@ async function createStatsEmbed(client: BotClient, prefix: string): Promise<Embe
         )
         .addFields({
             name: '\u200b',
-            value: `### Chỉ số hệ thống`,
+            value: `**Chỉ số hệ thống**`,
             inline: false
         })
         .addFields(

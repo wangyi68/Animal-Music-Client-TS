@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { createCommandConfig, commands } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
-import { smartDelete } from '../../utils/messageAutoDelete.js';
+import { smartDelete, MessageType } from '../../utils/messageAutoDelete.js';
 import { COLORS } from '../../utils/constants.js';
 
 // Category emoji IDs (for select menu - format: { id, animated })
@@ -138,7 +138,8 @@ async function showHelp(
             // Auto delete after 5 minutes - use IMPORTANT type equivalent with override
             smartDelete(reply, { overrideTimeout: 5 * 60 * 1000 });
         } else if (interaction) {
-            await interaction.reply({ embeds: [embed], components: [row] });
+            const reply = await interaction.reply({ embeds: [embed], components: [row] });
+            smartDelete(reply, { overrideTimeout: 5 * 60 * 1000 });
         }
         return { type: 'success' };
     }
@@ -148,12 +149,15 @@ async function showHelp(
         [...commands.values()].find(c => c.aliases.includes(commandName.toLowerCase()));
 
     if (!cmd) {
-        const errorMsg = `Không tìm thấy lệnh: **${commandName}**`;
+        const errorMsg = `Làm gì có lệnh **${commandName}** nào! Nhập cho đàng hoàng vào!`;
         const embedError = new EmbedBuilder()
             .setDescription(`> ${errorMsg}`)
             .setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, { type: MessageType.ERROR, contentLength: 50 });
+        }
         return { type: 'error', message: errorMsg };
     }
 
@@ -181,9 +185,11 @@ async function showHelp(
         .setTimestamp();
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO });
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO });
     }
 
     return { type: 'success' };

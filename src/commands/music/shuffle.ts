@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'shuffle',
@@ -42,29 +43,37 @@ async function shuffleQueue(
     if (!player) {
         const errorMsg = 'Shuffle cái gì?! Chưa có nhạc nào đang phát hết á!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
     if (player.queue.size < 2) {
-        const errorMsg = 'Trộn sao được khi chỉ có 1-2 bài! Thêm vào đi rồi tớ trộn cho~';
-        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
+        const embedError = new EmbedBuilder().setDescription('> Trời ạ! Có 1-2 bài thì trộn kiểu gì! Thêm bài vào đi!').setColor(COLORS.ERROR);
         if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
-        return { type: 'error', message: errorMsg };
+        else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
+        return { type: 'error', message: 'Not enough tracks to shuffle' };
     }
 
     player.queue.shuffle();
 
     const embed = new EmbedBuilder()
-        .setDescription(`Tớ đã trộn **${player.queue.size}** bài hát trong hàng chờ giúp bạn rồi nè!`)
-        .setColor(COLORS.MAIN);
+        .setDescription(`> Hứ! Đã trộn **${player.queue.size}** bài lung tung beng lên rồi đấy! Chúc may mắn!`)
+        .setColor(COLORS.SUCCESS);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
     }
 
     return { type: 'success' };

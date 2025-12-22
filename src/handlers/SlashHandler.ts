@@ -11,6 +11,7 @@ import { createLogger } from '../utils/logger.js';
 import { commands, checkCooldown } from './CommandHandler.js';
 import type { Config, SlashCommandContext, CommandResult } from '../types/index.js';
 import { COLORS } from '../utils/constants.js';
+import { smartDelete, DeletePresets } from '../utils/messageAutoDelete.js';
 
 const logger = createLogger('SlashHandler');
 
@@ -124,7 +125,7 @@ export async function handleSlashCommand(
 
     if (!command) {
         const embed = new EmbedBuilder()
-            .setDescription('> Hả?! Lệnh này không tồn tại đâu!')
+            .setDescription('> Hả?! Làm gì có lệnh này! Mơ à!')
             .setColor(COLORS.ERROR);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         return;
@@ -135,7 +136,7 @@ export async function handleSlashCommand(
         const member = interaction.member as any;
         if (!member?.voice?.channel) {
             const embed = new EmbedBuilder()
-                .setDescription('> Vào **phòng Voice** đi rồi tớ mới phát nhạc cho!')
+                .setDescription('> Đã bảo là vào **Voice** trước đi mà! Không vào sao tớ phát nhạc được!')
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -150,7 +151,7 @@ export async function handleSlashCommand(
     );
     if (cooldownRemaining !== null) {
         const embed = new EmbedBuilder()
-            .setDescription(`> Bình tĩnh nào! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi~`)
+            .setDescription(`> Từ từ thôi! Spam lệnh là tớ dỗi đấy! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi!`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         return;
@@ -183,11 +184,12 @@ export async function handleSlashCommand(
         logger.error(`Error executing slash command ${command.name}: ${(error as Error).message}`);
 
         const embed = new EmbedBuilder()
-            .setDescription('> Có lỗi xảy ra khi thực thi lệnh rồi nè!')
+            .setDescription('> Áá! Có lỗi rồi! Không phải tại tớ đâu nha!')
             .setColor(COLORS.ERROR);
 
         if (interaction.deferred || interaction.replied) {
-            await interaction.editReply({ embeds: [embed] });
+            const msg = await interaction.editReply({ embeds: [embed] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
         } else {
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
@@ -241,19 +243,19 @@ async function handleSlashResult(
             break;
         case 'invalidArguments':
             const embedArg = new EmbedBuilder()
-                .setDescription(`> Sai cách dùng lệnh rồi! Kiểm tra lại đi nha~`)
+                .setDescription(`> Dùng lệnh sai bét rồi! Kiểm tra lại đi!`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embedArg], flags: MessageFlags.Ephemeral });
             break;
         case 'insufficientPermissions':
             const embedPerm = new EmbedBuilder()
-                .setDescription('> Bạn không có quyền dùng lệnh này đâu!')
+                .setDescription('> Bạn làm gì có cửa dùng lệnh này! Hứ!')
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embedPerm], flags: MessageFlags.Ephemeral });
             break;
         case 'cooldown':
             const embedCool = new EmbedBuilder()
-                .setDescription(`> Bình tĩnh nào! Đợi **${result.remainingTime}s** nữa đi~`)
+                .setDescription(`> Đã bảo là đợi **${result.remainingTime}s** nữa đi mà!`)
                 .setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedCool], flags: MessageFlags.Ephemeral });
             break;

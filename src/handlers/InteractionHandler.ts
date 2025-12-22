@@ -54,7 +54,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
 
     if (!player) {
         const embed = new EmbedBuilder()
-            .setDescription(`> Đâu có nhạc nào đang phát đâu mà bấm nút!`)
+            .setDescription(`> Không có nhạc mà cứ bấm nút loạn xạ à! Im lặng đi!`)
             .setColor(COLORS.ERROR);
 
         if (interaction.message) {
@@ -95,7 +95,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
         if (!hasPermission) {
             const errorEmbed = new EmbedBuilder()
                 .setAuthor({ name: 'Hảả?! Mấy cái nút này không phải của bạn!' })
-                .setDescription(`> Bài hát này là yêu cầu của: ${requester?.toString?.() || 'Không rõ'}`)
+                .setDescription(`> Bài hát này là yêu cầu của: ${requester?.toString?.() || 'Không rõ'}\n> Đừng có táy máy tay chân!`)
                 .setColor(COLORS.ERROR);
             const reply = await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
             smartDelete(reply, DeletePresets.NO_PERMISSION);
@@ -107,7 +107,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
         case 'prev':
             const previousTracks = player.queue.previous;
             if (!previousTracks || previousTracks.length === 0) {
-                const embed = new EmbedBuilder().setDescription('> Làm gì có bài trước đó đâu mà lùi!').setColor(COLORS.ERROR);
+                const embed = new EmbedBuilder().setDescription('> Hết đường lùi rồi! Đừng có cố nữa!').setColor(COLORS.ERROR);
                 await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
@@ -128,7 +128,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
         case 'stop':
             await player.destroy();
             await interaction.message.delete().catch(() => { });
-            const embedStop = new EmbedBuilder().setDescription('Đã dừng nhạc nè~').setColor(COLORS.MAIN);
+            const embedStop = new EmbedBuilder().setDescription('Dừng rồi đấy! Vừa lòng chưa?').setColor(COLORS.MAIN);
             const channel = interaction.channel as TextChannel;
             if (channel) {
                 const msg = await channel.send({ embeds: [embedStop] });
@@ -150,13 +150,13 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
 
         case 'shuffle':
             player.queue.shuffle();
-            const embedShuffle = new EmbedBuilder().setDescription('Tớ đã xáo trộn lại danh sách bài hát giúp bạn rồi nè!').setColor(COLORS.MAIN);
+            const embedShuffle = new EmbedBuilder().setDescription('Đã xáo trộn giúp rồi đấy! Rối tung lên cho xem!').setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedShuffle], flags: MessageFlags.Ephemeral });
             return;
 
         case 'clear':
             player.queue.clear();
-            const embedClear = new EmbedBuilder().setDescription('Tớ đã dọn dẹp danh sách chờ sạch bóng luôn rồi đó~').setColor(COLORS.MAIN);
+            const embedClear = new EmbedBuilder().setDescription('Dọn sạch sẽ rồi! Đừng có bày bừa ra nữa nha!').setColor(COLORS.MAIN);
             await interaction.reply({ embeds: [embedClear], flags: MessageFlags.Ephemeral });
             return;
 
@@ -313,7 +313,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
     if (interaction.customId === 'volume_modal') {
         if (!player) {
             const embed = new EmbedBuilder()
-                .setDescription(`> Chưa bật nhạc thì chỉnh volume làm gì!`)
+                .setDescription(`> Chưa bật nhạc mà đòi chỉnh volume! Ngáo à?`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -324,7 +324,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (isNaN(volume) || volume < 0 || volume > 100) {
             const embed = new EmbedBuilder()
-                .setDescription(`> Số phải từ **0** đến **100** thôi nha!`)
+                .setDescription(`> Đã bảo là từ **0** đến **100** thôi! Không biết đếm à?`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -332,7 +332,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         player.setVolume(volume);
         const embed = new EmbedBuilder()
-            .setDescription(`> Tớ đã đặt âm lượng thành **${volume}%** rồi nè~`)
+            .setDescription(`> Rồi rồi! Đã chỉnh xuống **${volume}%** rồi nhé! Đừng bắt tớ chỉnh nữa!`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
@@ -343,7 +343,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (!player) {
             const embed = new EmbedBuilder()
-                .setDescription(`> Dùng lệnh \`/play\` trước đi rồi tớ mới tìm cho~`)
+                .setDescription(`> Dùng lệnh \`/play\` trước đi! Đừng có đốt cháy giai đoạn!`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
@@ -356,7 +356,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
 
         if (!result.tracks.length) {
             const embed = new EmbedBuilder()
-                .setDescription(`> Không tìm thấy gì cho \`${query}\` hết trơn! Thử từ khóa khác đi~`)
+                .setDescription(`> Tìm mãi chả thấy gì cho \`${query}\` cả! Tìm cái khác đi!`)
                 .setColor(COLORS.ERROR);
             await interaction.editReply({ embeds: [embed] });
             return;

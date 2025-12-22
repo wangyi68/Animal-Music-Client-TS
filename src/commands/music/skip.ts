@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'skip',
@@ -42,8 +43,12 @@ async function skipTrack(
     if (!player) {
         const errorMsg = 'Hảả?! Làm gì có nhạc nào đang phát đâu mà skip!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
@@ -55,9 +60,11 @@ async function skipTrack(
         .setColor(COLORS.MAIN);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, DeletePresets.TRACK_ADDED);
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, DeletePresets.TRACK_ADDED);
     }
 
     return { type: 'success' };

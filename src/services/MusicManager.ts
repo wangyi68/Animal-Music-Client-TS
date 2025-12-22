@@ -190,7 +190,7 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
     if (!channel) return;
 
     const embed = new EmbedBuilder()
-        .setDescription(`> Hết nhạc rồi nè~ Muốn nghe nữa thì thêm bài vào đi nha!`)
+        .setDescription(`> Hết nhạc rồi! Chán quá đi mất! Muốn nghe nữa thì thêm bài vào đi!`)
         .setColor(COLORS.MAIN);
 
     channel.send({ embeds: [embed] }).catch(() => { });
@@ -204,13 +204,13 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSi
 
     // Queue info with markdown
     const queueInfo = queueSize !== undefined && queueSize > 0
-        ? `Còn **${queueSize}** bài nữa nè!`
-        : 'Hàng chờ trống rồi...';
+        ? `Còn **${queueSize}** bài nữa lận! Nghe mệt nghỉ!`
+        : 'Hàng chờ trống trơn! Thêm nhạc đi!';
 
     return new EmbedBuilder()
         .setColor(COLORS.MAIN)
         .setAuthor({
-            name: `Đang phát cho bạn nghe nè~`,
+            name: `Đang phát nhạc giúp bạn đây!`,
             iconURL: botAvatarUrl
         })
         .setTitle(track.title)

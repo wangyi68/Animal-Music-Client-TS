@@ -104,7 +104,7 @@ async function processCommand(context: CommandContext, _config: Config): Promise
     if (command.config.voiceChannel || command.config.category === 'music') {
         const memberVoice = context.message.member?.voice?.channel;
         if (!memberVoice) {
-            const embed = new EmbedBuilder().setDescription('> Vào phòng Voice đi rồi tớ mới chiều!').setColor(COLORS.ERROR);
+            const embed = new EmbedBuilder().setDescription('> Muốn nghe nhạc thì vào phòng Voice trước đi chứ! Ngốc thật!').setColor(COLORS.ERROR);
             await tempReply(context.message, embed);
             return;
         }
@@ -117,7 +117,7 @@ async function processCommand(context: CommandContext, _config: Config): Promise
         command.config.cooldown
     );
     if (cooldownRemaining !== null) {
-        const embed = new EmbedBuilder().setDescription(`> Bình tĩnh nào! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi~`).setColor(COLORS.MAIN);
+        const embed = new EmbedBuilder().setDescription(`> Từ từ thôi! Spam lệnh là tớ dỗi đấy! Đợi **${cooldownRemaining.toFixed(1)}s** nữa đi!`).setColor(COLORS.MAIN);
         await tempReply(context.message, embed);
         return;
     }
@@ -129,7 +129,7 @@ async function processCommand(context: CommandContext, _config: Config): Promise
         command.config.requireBotPermissions
     );
     if (!permCheck.valid) {
-        const embed = new EmbedBuilder().setDescription(`> Thiếu quyền **${permCheck.missing.join(', ')}** rồi kìa!`).setColor(COLORS.ERROR);
+        const embed = new EmbedBuilder().setDescription(`> Bạn làm gì có quyền **${permCheck.missing.join(', ')}** mà đòi dùng lệnh này! Hứ!`).setColor(COLORS.ERROR);
         await tempReply(context.message, embed);
         return;
     }
@@ -151,15 +151,15 @@ function handleCommandResult(result: CommandResult, context: CommandContext, con
             sendErrorEmbed(context.message, result.message);
             break;
         case 'invalidArguments':
-            const embedArg = new EmbedBuilder().setDescription(`> Sai cách dùng lệnh rồi! Dùng đúng thế này nè: \`${config.usage}\``).setColor(COLORS.ERROR);
+            const embedArg = new EmbedBuilder().setDescription(`> Dùng lệnh kiểu gì thế hả?! Dùng đúng thế này nè: \`${config.usage}\``).setColor(COLORS.ERROR);
             tempReply(context.message, embedArg);
             break;
         case 'insufficientPermissions':
-            const embedPerm = new EmbedBuilder().setDescription('> Bạn không có quyền dùng lệnh này đâu!').setColor(COLORS.ERROR);
+            const embedPerm = new EmbedBuilder().setDescription('> Bạn làm gì có cửa dùng lệnh này! Hứ!').setColor(COLORS.ERROR);
             tempReply(context.message, embedPerm);
             break;
         case 'cooldown':
-            const embedCool = new EmbedBuilder().setDescription(`> Bình tĩnh nào! Đợi **${result.remainingTime}s** nữa đi~`).setColor(COLORS.MAIN);
+            const embedCool = new EmbedBuilder().setDescription(`> Đã bảo là đợi **${result.remainingTime}s** nữa đi mà!`).setColor(COLORS.MAIN);
             tempReply(context.message, embedCool);
             break;
     }
@@ -182,7 +182,7 @@ async function sendBotInfo(message: Message, config: Config): Promise<void> {
 
 async function sendErrorEmbed(message: Message, error: string): Promise<void> {
     const embed = new EmbedBuilder()
-        .setDescription(`Có lỗi xảy ra rồi nè: \n\`\`\`\n${error.slice(0, 2000)}\n\`\`\``)
+        .setDescription(`Áá! Có lỗi rồi! Không phải tại tớ đâu nha!\n\`\`\`\n${error.slice(0, 2000)}\n\`\`\``)
         .setColor(COLORS.ERROR);
 
     const reply = await message.reply({ embeds: [embed] });

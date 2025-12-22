@@ -81,8 +81,12 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
         const embed = new EmbedBuilder()
             .setDescription(`Huhu, bạn chưa vào phòng Voice kìa!`)
             .setColor(COLORS.ERROR);
-        if (isInteraction) await context.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
-        else await context.reply({ embeds: [embed] });
+        if (isInteraction) {
+            await context.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        } else {
+            const msg = await context.reply({ embeds: [embed] });
+            smartDelete(msg, DeletePresets.NO_PERMISSION);
+        }
         return { type: 'error', message: 'No voice channel' };
     }
 
@@ -111,10 +115,15 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
 
     if (!result.tracks.length) {
         const embed = new EmbedBuilder()
-            .setDescription(`**Không tìm thấy bài hát mà bạn muốn tìm. Vui lòng thử lại.**`)
+            .setDescription(`**Hứ! Tìm mãi không thấy bài đó đâu cả... Tìm lại cho đàng hoàng đi!**`)
             .setColor(COLORS.ERROR);
-        if (isInteraction) await context.editReply({ embeds: [embed] });
-        else await context.reply({ embeds: [embed] });
+        if (isInteraction) {
+            const msg = await context.editReply({ embeds: [embed] });
+            smartDelete(msg, DeletePresets.SEARCH_RESULTS);
+        } else {
+            const msg = await context.reply({ embeds: [embed] });
+            smartDelete(msg, DeletePresets.SEARCH_RESULTS);
+        }
         return { type: 'error', message: 'No tracks found' };
     }
 
@@ -191,8 +200,13 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
         .setColor(COLORS.MAIN)
         .setFooter({ text: 'Gửi ngàn lời thương vào bản nhạc này~', iconURL: member.user.displayAvatarURL() });
 
-    if (isInteraction) await context.editReply({ embeds: [embed], components: [row] });
-    else await context.reply({ embeds: [embed], components: [row] });
+    if (isInteraction) {
+        const msg = await context.editReply({ embeds: [embed], components: [row] });
+        smartDelete(msg, DeletePresets.SEARCH_RESULTS);
+    } else {
+        const msg = await context.reply({ embeds: [embed], components: [row] });
+        smartDelete(msg, DeletePresets.SEARCH_RESULTS);
+    }
 
     return { type: 'success' };
 }

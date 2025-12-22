@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'ping',
@@ -33,7 +34,8 @@ const command: Command = {
             )
             .setColor(latency < 200 ? COLORS.SUCCESS : latency < 500 ? 0xFFFF00 : COLORS.ERROR);
 
-        await sent.edit({ embeds: [embed] });
+        const msg = await sent.edit({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO });
         return { type: 'success' };
     },
 
@@ -53,7 +55,8 @@ const command: Command = {
             )
             .setColor(latency < 200 ? COLORS.SUCCESS : latency < 500 ? 0xFFFF00 : COLORS.ERROR);
 
-        await interaction.editReply({ embeds: [embed] });
+        const msg = await interaction.editReply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO });
         return { type: 'success' };
     }
 };

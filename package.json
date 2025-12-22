@@ -1,6 +1,6 @@
 {
   "name": "animal-music-client-ts",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Discord Music Bot - TypeScript with MongoDB",
   "main": "dist/index.js",
   "scripts": {

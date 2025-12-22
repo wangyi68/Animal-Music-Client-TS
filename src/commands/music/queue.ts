@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'queue',
@@ -49,8 +50,12 @@ async function showQueue(
     if (!player || !player.queue.current) {
         const errorMsg = 'Làm gì có nhạc nào đang phát đâu mà xem! Bật nhạc đi rồi tớ mới show cho~';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
@@ -84,9 +89,11 @@ async function showQueue(
         .setColor(COLORS.MAIN);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, DeletePresets.QUEUE_DISPLAY);
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, DeletePresets.QUEUE_DISPLAY);
     }
 
     return { type: 'success' };

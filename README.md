@@ -148,6 +148,27 @@ npm start
 
 ## 🔄 Changelog
 
+### v2.1.2 - Auto-Delete & Tsundere Max (2025-12-22)
+
+#### ✨ Cải tiến & Tính năng mới
+- ✅ **Auto-Delete System (SmartDelete)**: Tự động xóa tin nhắn phản hồi (Success/Error) sau thời gian nhất định để giữ sạch kênh chat.
+- ✅ **Tsundere Personality Max**: Cập nhật toàn bộ tin nhắn sang phong cách Tsundere Cute (Dỗi khi lỗi, Emote khi vui).
+- ✅ **Interaction Refinement**: Cải thiện phản hồi cho các nút bấm và Modal (Search, Volume) chuẩn tính cách.
+- ✅ **Queue Info Update**: Hiển thị thông tin hàng chờ chi tiết hơn và dễ thương hơn.
+
+#### 📁 Files đã tham gia cập nhật
+| File | Thay đổi |
+|------|----------|
+| `src/utils/messageAutoDelete.ts` | **MỚI** - Logic SmartDelete và Presets |
+| `src/commands/music/*` | Áp dụng SmartDelete & Tsundere msgs |
+| `src/commands/info/*` | Áp dụng SmartDelete & Tsundere msgs |
+| `src/handlers/InteractionHandler.ts` | Update buttons/modals responses |
+| `src/handlers/SlashHandler.ts` | Update error responses |
+| `src/services/MusicManager.ts` | Update playback messages |
+| `package.json` | Bump version 2.1.2 |
+
+---
+
 ### v2.1.1 - Cluster & Embed Standardization (2025-12-22)
 
 #### ✨ Cải tiến giao diện & Tính năng

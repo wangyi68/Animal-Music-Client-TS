@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'volume',
@@ -52,39 +53,54 @@ async function setVolume(
     if (!player) {
         const errorMsg = 'Chỉnh volume cái gì khi chưa bật nhạc vậy?!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
     if (volume === undefined) {
         const embed = new EmbedBuilder()
-            .setDescription(`> Âm lượng hiện tại: **${player.volume}%**`)
+            .setDescription(`> Đang để **${player.volume}%** đấy! Điếc hay sao mà hỏi?`)
             .setColor(COLORS.MAIN);
 
-        if (message) await message.reply({ embeds: [embed] });
-        else if (interaction) await interaction.reply({ embeds: [embed] });
+        if (message) {
+            const msg = await message.reply({ embeds: [embed] });
+            smartDelete(msg, { type: MessageType.INFO, contentLength: 50 });
+        } else if (interaction) {
+            const msg = await interaction.reply({ embeds: [embed] });
+            smartDelete(msg, { type: MessageType.INFO, contentLength: 50 });
+        }
         return { type: 'success' };
     }
 
     if (isNaN(volume) || volume < 0 || volume > 100) {
-        const errorMsg = 'Âm lượng phải từ **0** đến **100** nha!';
+        const errorMsg = 'Này! Âm lượng chỉ được từ **0** đến **100** thôi! Đừng có làm khó tớ!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
     player.setVolume(volume);
 
     const embed = new EmbedBuilder()
-        .setDescription(`> Tớ đã đặt âm lượng thành **${volume}%** rồi nè!`)
-        .setColor(COLORS.MAIN);
+        .setDescription(`> Rồi rồi! Đã chỉnh xuống **${volume}%** rồi nhé! Đừng bắt tớ chỉnh nữa!`)
+        .setColor(COLORS.SUCCESS);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 50 });
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 50 });
     }
 
     return { type: 'success' };

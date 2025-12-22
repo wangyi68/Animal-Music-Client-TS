@@ -3,6 +3,7 @@ import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import { setLoopMode, getLoopMode } from '../../services/MusicManager.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext, LoopMode } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets, MessageType } from '../../utils/messageAutoDelete.js';
 
 const LOOP_MODES = ['Tắt', 'Bài hát', 'Hàng chờ'];
 
@@ -57,8 +58,12 @@ async function toggleLoop(
     if (!player) {
         const errorMsg = 'Loop cái gì khi chưa có nhạc vậy hả?!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
@@ -79,13 +84,15 @@ async function toggleLoop(
     setLoopMode(guildId, newMode);
 
     const embed = new EmbedBuilder()
-        .setDescription(`Đã chuyển chế độ lặp sang: **${LOOP_MODES[newMode]}** nha~`)
-        .setColor(COLORS.MAIN);
+        .setDescription(`> Đã chuyển chế độ lặp sang **${LOOP_MODES[newMode]}** rồi nha! Nghe cho chán thì thôi!`)
+        .setColor(COLORS.SUCCESS);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
     }
 
     return { type: 'success' };

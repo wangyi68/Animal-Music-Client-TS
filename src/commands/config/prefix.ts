@@ -3,6 +3,7 @@ import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import { setGuildPrefix } from '../../database/index.js';
 import type { Command, CommandContext, CommandResult, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'prefix',
@@ -44,31 +45,41 @@ async function changePrefix(
     interaction?: any
 ): Promise<CommandResult> {
     if (newPrefix.length > 5) {
-        const errorMsg = 'Prefix không được dài quá **5 ký tự** nha!';
+        const errorMsg = 'Ngốc quá! Prefix dài hơn **5 ký tự** thì ai mà nhớ được! Viết ngắn lại đi!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
     const success = await setGuildPrefix(guildId, newPrefix);
 
     if (!success) {
-        const errorMsg = 'Không thể thay đổi prefix rồi nè!';
+        const errorMsg = 'Ư... Có lỗi gì đó rồi, không đổi prefix được đâu! Thử lại sau đi!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
     const embed = new EmbedBuilder()
-        .setDescription(`> Tớ đã thay đổi prefix thành **\`${newPrefix}\`** rồi nha!`)
+        .setDescription(`> Hứ, nể tình lắm tớ mới đổi prefix thành **\`${newPrefix}\`** cho đấy nhé!`)
         .setColor(COLORS.SUCCESS);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO });
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO });
     }
 
     return { type: 'success' };

@@ -5,6 +5,7 @@ import { getLavalinkNodesStatus } from '../../services/MusicManager.js';
 import moment from 'moment';
 import 'moment-duration-format';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, MessageType, DeletePresets } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'lavalink',
@@ -28,18 +29,20 @@ const command: Command = {
         const ownerId = client.config.app.ownerId;
 
         if (ownerId && message.author.id !== ownerId) {
-            await message.reply({
+            const msg = await message.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor(COLORS.ERROR)
                         .setDescription('> ❌ Lệnh này chỉ dành cho **Owner Bot** thôi nha!')
                 ]
             });
+            smartDelete(msg, DeletePresets.NO_PERMISSION);
             return { type: 'error', message: 'Not bot owner' };
         }
 
         const embed = await createLavalinkEmbed(client);
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO, fieldsCount: 5 });
         return { type: 'success' };
     },
 
@@ -64,7 +67,8 @@ const command: Command = {
 
         await interaction.deferReply();
         const embed = await createLavalinkEmbed(client);
-        await interaction.editReply({ embeds: [embed] });
+        const msg = await interaction.editReply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO, fieldsCount: 5 });
         return { type: 'success' };
     }
 };
@@ -81,7 +85,7 @@ async function createLavalinkEmbed(client: BotClient): Promise<EmbedBuilder> {
         .setThumbnail(client.user?.displayAvatarURL() || null);
 
     if (nodes.length === 0) {
-        embed.setDescription('> ⚠️ Không tìm thấy Cluster nào được cấu hình!');
+        embed.setDescription('> ⚠️ Hả? Chả tìm thấy cái Cluster nào cả! Cấu hình kiểu gì vậy?!');
     } else {
         // Summary stats
         const connectedNodes = nodes.filter(n => n.state === 'CONNECTED').length;

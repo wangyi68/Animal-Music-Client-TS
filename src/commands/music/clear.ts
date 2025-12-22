@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'clear',
@@ -42,8 +43,12 @@ async function clearQueue(
     if (!player) {
         const errorMsg = 'Clear cái gì?! Làm gì có gì để clear đâu mà!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
-        if (interaction) await interaction.reply({ embeds: [embedError], ephemeral: true });
-        else if (message) await message.reply({ embeds: [embedError] });
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
         return { type: 'error', message: errorMsg };
     }
 
@@ -51,13 +56,15 @@ async function clearQueue(
     player.queue.clear();
 
     const embed = new EmbedBuilder()
-        .setDescription(`Tớ đã dọn sạch **${size}** bài hát khỏi hàng chờ rồi nè~`)
-        .setColor(COLORS.MAIN);
+        .setDescription(`> Dọn sạch sành sanh **${size}** bài rồi đấy! Mệt chết đi được!`)
+        .setColor(COLORS.SUCCESS);
 
     if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
     } else if (interaction) {
-        await interaction.reply({ embeds: [embed] });
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
     }
 
     return { type: 'success' };

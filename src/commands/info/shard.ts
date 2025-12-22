@@ -5,6 +5,7 @@ import { table } from 'table';
 import moment from 'moment';
 import 'moment-duration-format';
 import { COLORS } from '../../utils/constants.js';
+import { smartDelete, MessageType } from '../../utils/messageAutoDelete.js';
 
 const command: Command = {
     name: 'shard',
@@ -29,7 +30,8 @@ const command: Command = {
             .setDescription(`\`\`\`asciidoc\n${tableResult}\n\`\`\``)
             .setColor(COLORS.MAIN);
 
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO, contentLength: 500 });
         return { type: 'success' };
     },
 
@@ -44,7 +46,8 @@ const command: Command = {
             .setDescription(`\`\`\`asciidoc\n${tableResult}\n\`\`\``)
             .setColor(COLORS.MAIN);
 
-        await interaction.editReply({ embeds: [embed] });
+        const msg = await interaction.editReply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.INFO, contentLength: 500 });
         return { type: 'success' };
     }
 };
