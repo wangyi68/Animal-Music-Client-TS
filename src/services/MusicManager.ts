@@ -20,6 +20,7 @@ interface ExtendedPlayerData {
     history: KazagumoTrack[];
     originalQueue: KazagumoTrack[];
     lastMessageId: string | null;
+    hasPlayed: boolean; // Flag để theo dõi player đã phát nhạc chưa
 }
 
 const playerDataMap = new Map<string, ExtendedPlayerData>();
@@ -92,6 +93,40 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
     return kazagumo;
 }
 
+// Lấy ngẫu nhiên một node đã connected
+export function getRandomConnectedNode(kazagumo: Kazagumo): string | undefined {
+    const connectedNodes: string[] = [];
+
+    kazagumo.shoukaku.nodes.forEach((node, name) => {
+        // state 1 = CONNECTED
+        if (node.state === 1) {
+            connectedNodes.push(name);
+        }
+    });
+
+    if (connectedNodes.length === 0) {
+        logger.warn('No connected nodes available for random selection');
+        return undefined;
+    }
+
+    const randomIndex = Math.floor(Math.random() * connectedNodes.length);
+    const selectedNode = connectedNodes[randomIndex];
+    return selectedNode;
+}
+
+// Lấy danh sách tên tất cả các nodes đã connected
+export function getConnectedNodeNames(kazagumo: Kazagumo): string[] {
+    const connectedNodes: string[] = [];
+
+    kazagumo.shoukaku.nodes.forEach((node, name) => {
+        if (node.state === 1) {
+            connectedNodes.push(name);
+        }
+    });
+
+    return connectedNodes;
+}
+
 // Get status of all Lavalink nodes
 export function getLavalinkNodesStatus(kazagumo: Kazagumo): LavalinkNodeStatus[] {
     const statuses: LavalinkNodeStatus[] = [];
@@ -127,6 +162,9 @@ function handleTrackStart(player: KazagumoPlayer, track: KazagumoTrack, client: 
 
     const data = getPlayerData(player.guildId);
     if (!data?.textChannelId) return;
+
+    // Đánh dấu là player đã phát nhạc rồi
+    data.hasPlayed = true;
 
     const channel = client.channels.cache.get(data.textChannelId);
     if (!channel?.isTextBased() || channel.isDMBased()) return;
@@ -192,6 +230,17 @@ function handleQueueEmpty(player: KazagumoPlayer, client: Client): void {
     const data = getPlayerData(player.guildId);
     if (!data?.textChannelId) return;
 
+    // Chỉ gửi thông báo "hết nhạc" nếu player đã từng phát nhạc
+    // Điều này tránh việc gửi message khi player vừa được tạo hoặc khi queue ban đầu rỗng
+    if (!data.hasPlayed) return;
+
+    // QUAN TRỌNG: Kiểm tra thêm xem có bài nào đang phát không
+    // Nếu có bài đang phát thì không gửi thông báo (vì playerEmpty có thể trigger sai lúc)
+    if (player.queue.current) return;
+
+    // Kiểm tra thêm: nếu player đang playing hoặc paused thì không gửi
+    if (player.playing || player.paused) return;
+
     const channel = client.channels.cache.get(data.textChannelId);
     if (!channel?.isTextBased() || channel.isDMBased()) return;
 
@@ -247,7 +296,8 @@ export function setPlayerData(guildId: string, textChannelId: string): void {
         loopMode: 0,
         history: [],
         originalQueue: [],
-        lastMessageId: null
+        lastMessageId: null,
+        hasPlayed: false // Khởi tạo là chưa phát nhạc
     });
 }
 

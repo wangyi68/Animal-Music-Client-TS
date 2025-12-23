@@ -10,7 +10,7 @@ import {
 import { createCommandConfig } from '../../handlers/CommandHandler.js';
 import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
 import { COLORS } from '../../utils/constants.js';
-import { setPlayerData } from '../../services/MusicManager.js';
+import { setPlayerData, getRandomConnectedNode } from '../../services/MusicManager.js';
 import { smartDelete, DeletePresets } from '../../utils/messageAutoDelete.js';
 
 export default {
@@ -100,11 +100,15 @@ async function playLogic(client: BotClient, context: any, query: string): Promis
 
     let player = client.kazagumo.players.get(guildId);
     if (!player) {
+        // Chọn random node để phát nhạc
+        const randomNode = getRandomConnectedNode(client.kazagumo);
+
         player = await client.kazagumo.createPlayer({
             guildId: guildId,
             textId: context.channelId,
             voiceId: member.voice.channel.id,
-            volume: 100
+            volume: 100,
+            nodeName: randomNode // Sử dụng random node
         });
     }
 

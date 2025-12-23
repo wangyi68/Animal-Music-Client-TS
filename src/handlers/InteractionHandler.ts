@@ -15,7 +15,7 @@ import {
     ComponentType,
     TextChannel
 } from 'discord.js';
-import { setLoopMode, getLoopMode, setPlayerData } from '../services/MusicManager.js';
+import { setLoopMode, getLoopMode, setPlayerData, getRandomConnectedNode } from '../services/MusicManager.js';
 import type { BotClient, LoopMode } from '../types/index.js';
 import { COLORS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
@@ -283,11 +283,15 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promi
         if (!player) {
             const member = interaction.member as any;
             if (member?.voice?.channel) {
+                // Chọn random node để phát nhạc
+                const randomNode = getRandomConnectedNode(client.kazagumo);
+
                 player = await client.kazagumo.createPlayer({
                     guildId: guildId!,
                     textId: interaction.channelId!,
                     voiceId: member.voice.channel.id,
-                    volume: 100
+                    volume: 100,
+                    nodeName: randomNode // Sử dụng random node
                 });
             } else {
                 return;
