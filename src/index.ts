@@ -15,6 +15,7 @@ import { registerSlashCommands, handleSlashCommand, handleAutocomplete } from '.
 import { handleInteraction } from './handlers/InteractionHandler.js';
 import { createKazagumo, getLavalinkNodesStatus } from './services/MusicManager.js';
 import { AnimalSync } from './services/AnimalSync.js';
+import { StateManager, NodeManager } from './core/index.js';
 import type { Config, BotClient } from './types/index.js';
 
 const logger = createLogger('Main');
@@ -124,7 +125,7 @@ async function main(): Promise<void> {
 
                     displayActivity = {
                         name: `Cluster: ${nodes.length} | Play: ${totalPlayers} | RAM: ${formatBytes(memoryUsage)}`,
-                        type: ActivityType.Streaming,   
+                        type: ActivityType.Streaming,
                         url: 'https://www.youtube.com/watch?v=vkpcyY7Xe64',
                     };
                 }
@@ -267,6 +268,10 @@ async function main(): Promise<void> {
             const animalSync = AnimalSync.getInstance();
             await animalSync.dispose();
         } catch (e) { }
+
+        // Cleanup core services
+        StateManager.dispose();
+        NodeManager.dispose();
 
         await disconnectDatabase();
         client.destroy();

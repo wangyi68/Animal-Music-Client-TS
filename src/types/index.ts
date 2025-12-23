@@ -54,11 +54,17 @@ export interface WebSocketConfig {
     secret: string;
 }
 
+export interface SpotifyConfig {
+    clientId: string;
+    clientSecret: string;
+}
+
 export interface Config {
     app: AppConfig;
     lavalink: LavalinkConfig;
     mongodb: MongoDBConfig;
-    websocket: WebSocketConfig;
+    websocket?: WebSocketConfig;
+    spotify?: SpotifyConfig;
 }
 
 // Command types

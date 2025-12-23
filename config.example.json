@@ -23,5 +23,13 @@
   },
   "mongodb": {
     "uri": "mongodb://localhost:27017/animal-music"
+  },
+  "spotify": {
+    "clientId": "YOUR_SPOTIFY_CLIENT_ID",
+    "clientSecret": "YOUR_SPOTIFY_CLIENT_SECRET"
+  },
+  "websocket": {
+    "url": "",
+    "secret": ""
   }
 }

@@ -16,6 +16,7 @@ import {
     TextChannel
 } from 'discord.js';
 import { setLoopMode, getLoopMode, setPlayerData, getRandomConnectedNode } from '../services/MusicManager.js';
+import { StateManager, QueueManager } from '../core/index.js';
 import type { BotClient, LoopMode } from '../types/index.js';
 import { COLORS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';

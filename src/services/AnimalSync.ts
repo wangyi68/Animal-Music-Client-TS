@@ -53,11 +53,11 @@ export class AnimalSync {
     }
 
     private buildConnection(): HubConnection {
-        const url = `${this.config.websocket.url}?ClientId=${this.clientId}`;
+        const url = `${this.config.websocket?.url || ''}?ClientId=${this.clientId}`;
 
         return new HubConnectionBuilder()
             .withUrl(url, {
-                headers: { 'Secret': this.config.websocket.secret },
+                headers: { 'Secret': this.config.websocket?.secret || '' },
                 transport: HttpTransportType.WebSockets
             })
             .withAutomaticReconnect({

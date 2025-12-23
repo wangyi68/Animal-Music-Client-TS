@@ -11,13 +11,20 @@
 - **Khi dỗi**: "Hảả?! Làm gì có nhạc nào đang phát đâu mà skip!", "Loop cái gì khi chưa có nhạc vậy hả?!"
 
 ### 🎧 Chức năng âm nhạc
-- Phát nhạc từ **YouTube**, **Spotify**, **SoundCloud**
+- Phát nhạc từ **YouTube** và **Spotify**
 - Hàng chờ thông minh với phân trang
 - Loop (Tắt / Bài / Hàng chờ)
-- Shuffle ngẫu nhiên
+- Shuffle ngẫu nhiên & **Fair Shuffle** (xáo trộn công bằng)
 - Điều khiển âm lượng
 - **Hỗ trợ Multi-Cluster** với failover tự động và cân bằng tải
+- **Smart Node Selection** - Tự động chọn node tốt nhất
 - Hiển thị Cluster xử lý track hiện tại
+
+### 🏗️ Kiến trúc v3.0 (Core Services)
+- **StateManager**: Quản lý state tập trung với caching
+- **NodeManager**: Load balancing và health monitoring cho Lavalink nodes
+- **QueueManager**: Queue operations nâng cao (move, remove, fair shuffle)
+- **ErrorHandler**: Unified error handling với retry logic
 
 ### 🎛️ Bảng điều khiển thông minh
 - **9 nút điều khiển**: Previous, Pause/Resume, Stop, Next, Loop, Shuffle, Queue, Search, Volume
@@ -28,13 +35,20 @@
 | Lệnh | Mô tả |
 |------|-------|
 | `/play <query>` | Phát nhạc |
-| `/stop` | Dừng phát và xóa hàng chờ |
+| `/playnext <query>` | Thêm bài vào đầu queue |
+| `/stop` | Dừng phát và rời voice |
 | `/pause` | Tạm dừng/tiếp tục |
 | `/skip` | Bỏ qua bài hiện tại |
 | `/queue` | Xem hàng chờ |
+| `/nowplaying` | **MỚI** - Xem bài đang phát với progress bar |
+| `/seek <time>` | **MỚI** - Tua đến vị trí (VD: 1:30) |
+| `/replay` | **MỚI** - Phát lại bài từ đầu |
 | `/loop <mode>` | Chuyển chế độ lặp |
 | `/shuffle` | Trộn hàng chờ |
-| `/volume <0-100>` | Chỉnh âm lượng |
+| `/fairshuffle` | Trộn công bằng (mỗi user được phát đều) |
+| `/move <from> <to>` | Di chuyển bài trong queue |
+| `/remove <position>` | Xóa bài khỏi queue |
+| `/volume <0-200>` | Chỉnh âm lượng |
 | `/clear` | Xóa hàng chờ |
 | `/help` | Xem danh sách lệnh (có Select Menu) |
 | `/stats` | Xem thông tin bot |
@@ -45,21 +59,33 @@
 ### 🏗️ Cấu trúc thư mục
 ```
 src/
-├── commands/
-│   ├── music/      (play, stop, pause, skip, queue, loop, shuffle, clear, volume)
-│   ├── info/       (help, ping, shard, stats)
-│   └── config/     (prefix)
+├── core/           # v3.0 Core Services
+│   ├── StateManager.ts     # Unified state management
+│   ├── NodeManager.ts      # Smart node selection
+│   ├── QueueManager.ts     # Enhanced queue operations
+│   ├── ErrorHandler.ts     # Unified error handling
+│   └── index.ts
+├── commands/       # 22 commands
+│   ├── music/      # 16 commands: play, playnext, stop, pause, skip, queue, nowplaying, seek, replay, loop, shuffle, fairshuffle, move, remove, clear, volume
+│   ├── info/       # 5 commands: help, ping, shard, stats, lavalink
+│   └── config/     # 1 command: prefix
 ├── handlers/
 │   ├── CommandHandler.ts
 │   ├── InteractionHandler.ts
 │   ├── MessageHandler.ts
 │   └── SlashHandler.ts
 ├── services/
-│   └── MusicManager.ts
+│   ├── MusicManager.ts
+│   └── AnimalSync.ts
+├── database/
+│   └── index.ts
 ├── utils/
 │   ├── buttons.ts
 │   ├── constants.ts
-│   └── logger.ts
+│   ├── logger.ts
+│   └── messageAutoDelete.ts
+├── types/
+│   └── index.ts
 └── index.ts
 ```
 
@@ -147,6 +173,43 @@ npm start
 ---
 
 ## 🔄 Changelog
+
+### v3.0.0 - Big Architecture Update (2025-12-23)
+
+#### 🚀 Kiến trúc mới (Core Services)
+- ✅ **StateManager**: Unified state management với caching, history, và auto cleanup
+- ✅ **NodeManager**: Smart Lavalink node selection với health scoring và load balancing
+- ✅ **QueueManager**: Enhanced queue operations (move, remove, fair shuffle, duplicate removal)
+- ✅ **ErrorHandler**: Unified error handling với error codes và retry logic
+
+#### ✨ Lệnh mới
+- ✅ `/playnext` - Thêm bài vào đầu queue (phát ngay sau bài hiện tại)
+- ✅ `/move <from> <to>` - Di chuyển bài trong queue
+- ✅ `/remove <position>` - Xóa bài khỏi queue theo vị trí
+- ✅ `/fairshuffle` - Xáo trộn công bằng (mỗi user được phát đều)
+
+#### 🎯 Cải tiến
+- ✅ **Smart Node Selection**: Tự động chọn node tốt nhất dựa trên health score
+- ✅ **Health Monitoring**: Theo dõi CPU, RAM, ping của từng node
+- ✅ **Auto Failover**: Tự động chuyển sang node khác khi có lỗi
+- ✅ **Caching System**: Cache search results và track metadata
+- ✅ **Better History**: Lưu lịch sử phát với giới hạn configurable
+- ✅ **Graceful Cleanup**: Tự động cleanup inactive states
+
+#### 📁 Files mới
+| File | Mô tả |
+|------|-------|
+| `src/core/StateManager.ts` | Unified state management |
+| `src/core/NodeManager.ts` | Smart node selection & monitoring |
+| `src/core/QueueManager.ts` | Enhanced queue operations |
+| `src/core/ErrorHandler.ts` | Unified error handling |
+| `src/core/index.ts` | Core exports |
+| `src/commands/music/playnext.ts` | PlayNext command |
+| `src/commands/music/move.ts` | Move command |
+| `src/commands/music/remove.ts` | Remove command |
+| `src/commands/music/fairshuffle.ts` | FairShuffle command |
+
+---
 
 ### v2.1.2 - Auto-Delete & Tsundere Max (2025-12-22)
 

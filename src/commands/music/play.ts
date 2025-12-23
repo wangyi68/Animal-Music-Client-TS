@@ -15,7 +15,7 @@ import { smartDelete, DeletePresets } from '../../utils/messageAutoDelete.js';
 
 export default {
     name: 'play',
-    description: 'Phát nhạc từ YouTube/Spotify/SoundCloud',
+    description: 'Phát nhạc từ YouTube/Spotify',
     aliases: ['p', 'pp'],
     config: createCommandConfig({
         category: 'music',
@@ -26,7 +26,7 @@ export default {
 
     slashCommand: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('Phát nhạc từ YouTube/Spotify/SoundCloud')
+        .setDescription('Phát nhạc từ YouTube/Spotify')
         .addStringOption(option =>
             option.setName('query')
                 .setDescription('Tên bài hát hoặc link')
