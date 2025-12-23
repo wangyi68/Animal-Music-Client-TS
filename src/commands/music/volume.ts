@@ -10,7 +10,7 @@ const command: Command = {
     aliases: ['vol'],
     config: createCommandConfig({
         category: 'music',
-        usage: 'volume <0-100>',
+        usage: 'volume <0-125>',
         cooldown: 3,
         voiceChannel: true
     }),
@@ -20,9 +20,9 @@ const command: Command = {
         .setDescription('Thay đổi âm lượng')
         .addIntegerOption(option =>
             option.setName('level')
-                .setDescription('Mức âm lượng (0-100)')
+                .setDescription('Mức âm lượng (0-125)')
                 .setMinValue(0)
-                .setMaxValue(100)
+                .setMaxValue(125)
                 .setRequired(false)
         ) as SlashCommandBuilder,
 
@@ -77,8 +77,8 @@ async function setVolume(
         return { type: 'success' };
     }
 
-    if (isNaN(volume) || volume < 0 || volume > 100) {
-        const errorMsg = 'Này! Âm lượng chỉ được từ **0** đến **100** thôi! Đừng có làm khó tớ!';
+    if (isNaN(volume) || volume < 0 || volume > 125) {
+        const errorMsg = 'Này! Âm lượng chỉ được từ **0** đến **125** thôi! Đừng có làm khó tớ!';
         const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
         if (interaction) {
             await interaction.reply({ embeds: [embedError], ephemeral: true });

@@ -87,7 +87,7 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     const isRequester = !requester || requester?.id === interaction.user.id;
 
     // For certain actions, check if user is the requester or has permission
-    const restrictedActions = ['stop', 'clear_btn', 'loop', 'shuffle', 'pause_resume', 'skip', 'prev', 'next', 'volume'];
+    const restrictedActions = ['stop', 'clear_btn', 'loop', 'shuffle', 'pause_resume', 'skip', 'prev', 'next', 'volume_btn'];
     if (restrictedActions.includes(customId) && !isRequester) {
         const member = interaction.member as any;
         const hasPermission = member?.permissions?.has?.('ManageGuild');
@@ -252,12 +252,13 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     }
 
     if (customId === 'volume_btn') {
+        // Lưu message ID vào customId để có thể update panel sau khi submit modal
         const modal = new ModalBuilder()
-            .setCustomId('volume_modal')
+            .setCustomId(`volume_modal:${interaction.message.id}`)
             .setTitle('Điều chỉnh âm lượng');
         const volumeInput = new TextInputBuilder()
             .setCustomId('volume_input')
-            .setLabel('Nhập âm lượng (0-100)')
+            .setLabel('Nhập âm lượng (0-125)')
             .setStyle(TextInputStyle.Short)
             .setPlaceholder(player.volume.toString())
             .setRequired(true)
@@ -355,7 +356,7 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
     const client = interaction.client as BotClient;
     const player = client.kazagumo.players.get(interaction.guildId!);
 
-    if (interaction.customId === 'volume_modal') {
+    if (interaction.customId.startsWith('volume_modal')) {
         if (!player) {
             const embed = new EmbedBuilder()
                 .setDescription(`> Chưa bật nhạc mà đòi chỉnh volume! Ngáo à?`)
@@ -367,24 +368,39 @@ async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
         const volumeStr = interaction.fields.getTextInputValue('volume_input');
         const volume = parseInt(volumeStr);
 
-        if (isNaN(volume) || volume < 0 || volume > 100) {
+        if (isNaN(volume) || volume < 0 || volume > 125) {
             const embed = new EmbedBuilder()
-                .setDescription(`> Đã bảo là từ **0** đến **100** thôi! Không biết đếm à?`)
+                .setDescription(`> Đã bảo là từ **0** đến **125** thôi! Không biết đếm à?`)
                 .setColor(COLORS.ERROR);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
         }
 
         player.setVolume(volume);
+
         const embed = new EmbedBuilder()
             .setDescription(`> Rồi rồi! Đã chỉnh **${volume}%** rồi nhé! Đừng bắt tớ chỉnh nữa!`)
             .setColor(COLORS.MAIN);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
-        // Cập nhật button panel với volume mới
+        // Cập nhật button panel với volume mới - truyền volume trực tiếp vì player.volume chưa cập nhật ngay
         const loopModeVolume = getLoopMode(interaction.guildId!);
-        const componentsVolume = createPlayerControlButtons(player, loopModeVolume);
-        await interaction.message?.edit({ components: componentsVolume }).catch(() => { });
+        const componentsVolume = createPlayerControlButtons(player, loopModeVolume, volume);
+
+        // Lấy message ID từ customId (format: volume_modal:messageId)
+        const messageId = interaction.customId.split(':')[1];
+
+        if (messageId && interaction.channelId) {
+            try {
+                const channel = interaction.guild?.channels.cache.get(interaction.channelId) as TextChannel;
+                if (channel) {
+                    const panelMessage = await channel.messages.fetch(messageId);
+                    await panelMessage.edit({ components: componentsVolume });
+                }
+            } catch {
+                // Message không tồn tại hoặc không thể edit
+            }
+        }
     }
 
     else if (interaction.customId === 'search_modal') {

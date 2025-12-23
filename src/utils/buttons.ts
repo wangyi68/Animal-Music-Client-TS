@@ -3,8 +3,9 @@ import { EMOJIS } from './constants.js';
 import { LoopMode } from '../types/index.js';
 import type { KazagumoPlayer } from 'kazagumo';
 
-export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: LoopMode): ActionRowBuilder<ButtonBuilder>[] {
+export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: LoopMode, volumeOverride?: number): ActionRowBuilder<ButtonBuilder>[] {
     const isPaused = player.paused;
+    const displayVolume = volumeOverride ?? player.volume;
 
     // Row 1: Playback Controls
     const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -59,7 +60,7 @@ export function createPlayerControlButtons(player: KazagumoPlayer, loopMode: Loo
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('volume_btn')
-            .setLabel(`${player.volume}%`)
+            .setLabel(`${displayVolume}%`)
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('clear')
