@@ -70,10 +70,10 @@ async function shuffleQueue(
 
     if (message) {
         const msg = await message.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
+        smartDelete(msg, DeletePresets.QUEUE_ACTION);
     } else if (interaction) {
         const msg = await interaction.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
+        smartDelete(msg, DeletePresets.QUEUE_ACTION);
     }
 
     return { type: 'success' };

@@ -4,8 +4,8 @@
   "description": "Discord Music Bot - TypeScript with MongoDB",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "rmdir /s /q dist && tsc",
+    "start": "rmdir /s /q dist && tsc && node .",
     "dev": "npx tsx watch src/index.ts"
   },
   "keywords": [

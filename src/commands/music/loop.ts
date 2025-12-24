@@ -89,10 +89,10 @@ async function toggleLoop(
 
     if (message) {
         const msg = await message.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
+        smartDelete(msg, DeletePresets.LOOP_CHANGE);
     } else if (interaction) {
         const msg = await interaction.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 60 });
+        smartDelete(msg, DeletePresets.LOOP_CHANGE);
     }
 
     return { type: 'success' };

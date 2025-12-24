@@ -431,7 +431,8 @@ async function showStatus(
     if (interaction) {
         await interaction.reply({ embeds: [embed] });
     } else if (message) {
-        await message.reply({ embeds: [embed] });
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, DeletePresets.SYSTEM_INFO);
     }
 
     return { type: 'success' };

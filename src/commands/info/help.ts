@@ -234,4 +234,42 @@ export function createCategoryEmbed(categories: string[], user: any, prefix: str
     return embeds;
 }
 
+// Export function to create help select menu (used by InteractionHandler)
+export function createHelpSelectMenu(selectedCategories: string[] = []): StringSelectMenuBuilder {
+    // Get all categories from commands
+    const categoryMap = new Map<string, string[]>();
+    commands.forEach((cmd) => {
+        const category = cmd.config.category || 'general';
+        if (!categoryMap.has(category)) {
+            categoryMap.set(category, []);
+        }
+        categoryMap.get(category)!.push(cmd.name);
+    });
+
+    const categories = [...categoryMap.keys()];
+
+    const menuOptions = categories.map(category => {
+        const option = new StringSelectMenuOptionBuilder()
+            .setLabel(category.charAt(0).toUpperCase() + category.slice(1))
+            .setDescription(`Xem các lệnh về ${category}`)
+            .setValue(category)
+            .setDefault(selectedCategories.includes(category));
+
+        // Add emoji if available
+        const emojiData = CATEGORY_EMOJIS[category];
+        if (emojiData) {
+            option.setEmoji({ id: emojiData.id, animated: emojiData.animated });
+        }
+
+        return option;
+    });
+
+    return new StringSelectMenuBuilder()
+        .setCustomId('help_menu')
+        .setPlaceholder('Chọn danh mục lệnh nè~')
+        .setMinValues(1)
+        .setMaxValues(Math.min(categories.length, 3))
+        .addOptions(menuOptions);
+}
+
 export default command;

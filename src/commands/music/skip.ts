@@ -61,10 +61,10 @@ async function skipTrack(
 
     if (message) {
         const msg = await message.reply({ embeds: [embed] });
-        smartDelete(msg, DeletePresets.TRACK_ADDED);
+        smartDelete(msg, DeletePresets.SKIP_TRACK);
     } else if (interaction) {
         const msg = await interaction.reply({ embeds: [embed] });
-        smartDelete(msg, DeletePresets.TRACK_ADDED);
+        smartDelete(msg, DeletePresets.SKIP_TRACK);
     }
 
     return { type: 'success' };

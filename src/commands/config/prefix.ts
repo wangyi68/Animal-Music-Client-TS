@@ -76,10 +76,10 @@ async function changePrefix(
 
     if (message) {
         const msg = await message.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.INFO });
+        smartDelete(msg, DeletePresets.PREFIX_CHANGE);
     } else if (interaction) {
         const msg = await interaction.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.INFO });
+        smartDelete(msg, DeletePresets.PREFIX_CHANGE);
     }
 
     return { type: 'success' };

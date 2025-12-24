@@ -56,6 +56,7 @@ export async function connectDatabase(config: Config): Promise<void> {
     try {
 
         await mongoose.connect(config.mongodb.uri, {
+            dbName: 'animal_music',
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
         });

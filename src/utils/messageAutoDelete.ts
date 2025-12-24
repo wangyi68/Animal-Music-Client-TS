@@ -83,7 +83,7 @@ export function calculateSmartTimeout(options: SmartDeleteOptions = {}): number 
     }
 
     const baseTimeout = BASE_TIMEOUTS[type];
-    
+
     // Không xóa tự động cho message quan trọng
     if (baseTimeout === -1) return -1;
 
@@ -111,7 +111,7 @@ export function smartDelete(
     options: SmartDeleteOptions = {}
 ): NodeJS.Timeout | null {
     const timeout = calculateSmartTimeout(options);
-    
+
     // Không xóa nếu timeout = -1
     if (timeout === -1) return null;
 
@@ -183,5 +183,43 @@ export const DeletePresets = {
     /** Thông báo dừng nhạc - 8 giây */
     MUSIC_STOPPED: { type: MessageType.SUCCESS, contentLength: 50 },
     /** Lỗi command - 15 giây (cần đọc lỗi) */
-    COMMAND_ERROR: { type: MessageType.ERROR, contentLength: 300 }
+    COMMAND_ERROR: { type: MessageType.ERROR, contentLength: 300 },
+    /** DJ actions (set role, add user, toggle) - 10 giây */
+    DJ_ACTION: { type: MessageType.SUCCESS, contentLength: 120 },
+    /** Thay đổi loop mode - 8 giây */
+    LOOP_CHANGE: { type: MessageType.SUCCESS, contentLength: 60 },
+    /** Thay đổi volume - 8 giây */
+    VOLUME_CHANGE: { type: MessageType.SUCCESS, contentLength: 50 },
+    /** Skip/Prev track - 8 giây */
+    SKIP_TRACK: { type: MessageType.SUCCESS, contentLength: 80 },
+    /** Thông tin bot/help ngắn - 12 giây */
+    BOT_INFO: { type: MessageType.INFO, contentLength: 200 },
+    /** Help menu có selection - 45 giây */
+    HELP_MENU: { type: MessageType.SELECTION, maxTimeout: 45000 },
+    /** Shuffle/Clear queue - 8 giây */
+    QUEUE_ACTION: { type: MessageType.SUCCESS, contentLength: 80 },
+    /** Thông báo prefix changed - 10 giây */
+    PREFIX_CHANGE: { type: MessageType.SUCCESS, contentLength: 100 },
+    /** Lavalink/Stats info - 20 giây */
+    SYSTEM_INFO: { type: MessageType.INFO, contentLength: 400, fieldsCount: 5 }
 } as const;
+
+/**
+ * Helper function để xóa message DJ action (8-15 giây)
+ */
+export function deleteAfterDJAction(message: Message | any, contentLength = 100): NodeJS.Timeout {
+    return smartDelete(message, {
+        type: MessageType.SUCCESS,
+        contentLength
+    }) as NodeJS.Timeout;
+}
+
+/**
+ * Helper function để xóa message queue action (shuffle, clear)
+ */
+export function deleteAfterQueueAction(message: Message | any, contentLength = 80): NodeJS.Timeout {
+    return smartDelete(message, {
+        type: MessageType.SUCCESS,
+        contentLength
+    }) as NodeJS.Timeout;
+}

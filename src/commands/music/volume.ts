@@ -97,10 +97,10 @@ async function setVolume(
 
     if (message) {
         const msg = await message.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 50 });
+        smartDelete(msg, DeletePresets.VOLUME_CHANGE);
     } else if (interaction) {
         const msg = await interaction.reply({ embeds: [embed] });
-        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 50 });
+        smartDelete(msg, DeletePresets.VOLUME_CHANGE);
     }
 
     return { type: 'success' };

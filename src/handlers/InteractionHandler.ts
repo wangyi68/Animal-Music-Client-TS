@@ -348,12 +348,14 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promi
         const embeds = createCategoryEmbed(values, interaction.user, '/');
 
         if (embeds.length > 0) {
-            await interaction.update({ embeds: embeds, components: [] });
+            // Reply với embed chi tiết dưới dạng ephemeral (chỉ người dùng thấy)
+            // Giữ nguyên message help gốc để người dùng có thể tiếp tục chọn
+            await interaction.reply({ embeds: embeds, flags: MessageFlags.Ephemeral });
         } else {
             const noCommandsEmbed = new EmbedBuilder()
                 .setDescription('> Không tìm thấy lệnh nào trong danh mục này nè.')
                 .setColor(COLORS.ERROR);
-            await interaction.update({ embeds: [noCommandsEmbed], components: [] });
+            await interaction.reply({ embeds: [noCommandsEmbed], flags: MessageFlags.Ephemeral });
         }
         return;
     }
