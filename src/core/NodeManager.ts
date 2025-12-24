@@ -174,7 +174,6 @@ class NodeManagerClass extends EventEmitter {
         if (!this.kazagumo) return;
 
         this.kazagumo.shoukaku.nodes.forEach((node, name) => {
-            const nodeAny = node as any;
             this.nodeHealth.set(name, {
                 name,
                 url: this.getNodeUrl(node),

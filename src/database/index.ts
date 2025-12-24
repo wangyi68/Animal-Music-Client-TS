@@ -20,9 +20,29 @@ const prefixSchema = new Schema<PrefixDocument>({
     prefix: { type: String, required: true }
 });
 
+// DJ Settings Schema - Hỗ trợ cả DJ Role và DJ User IDs
+export interface DJSettingsDocument {
+    guildId: string;
+    djRoleId: string | null;      // Role ID được phép làm DJ
+    djUserIds: string[];          // Danh sách User IDs được phép làm DJ
+    enabled: boolean;             // Bật/tắt DJ mode
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const djSettingsSchema = new Schema<DJSettingsDocument>({
+    guildId: { type: String, required: true, unique: true, index: true },
+    djRoleId: { type: String, default: null },
+    djUserIds: { type: [String], default: [] },
+    enabled: { type: Boolean, default: false }
+}, {
+    timestamps: true
+});
+
 // Models
 export const Guild = mongoose.model<GuildDocument>('Guild', guildSchema);
 export const Prefix = mongoose.model<PrefixDocument>('Prefix', prefixSchema);
+export const DJSettings = mongoose.model<DJSettingsDocument>('DJSettings', djSettingsSchema);
 
 // Database connection
 let isConnected = false;
@@ -118,3 +138,142 @@ export async function upsertGuild(guildId: string, guildName: string, ownerId?: 
         logger.error(`Error upserting guild ${guildId}: ${(error as Error).message}`);
     }
 }
+
+// ============================================
+// DJ SETTINGS OPERATIONS
+// ============================================
+
+/**
+ * Lấy DJ settings cho guild
+ */
+export async function getDJSettings(guildId: string): Promise<DJSettingsDocument | null> {
+    try {
+        return await DJSettings.findOne({ guildId });
+    } catch (error) {
+        logger.error(`Error getting DJ settings for guild ${guildId}: ${(error as Error).message}`);
+        return null;
+    }
+}
+
+/**
+ * Lấy DJ Role ID (legacy support)
+ */
+export async function getDJRole(guildId: string): Promise<string | null> {
+    try {
+        const settings = await DJSettings.findOne({ guildId });
+        return settings?.enabled ? settings.djRoleId : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+/**
+ * Set DJ Role cho guild
+ */
+export async function setDJRole(guildId: string, roleId: string | null): Promise<boolean> {
+    try {
+        await DJSettings.findOneAndUpdate(
+            { guildId },
+            {
+                guildId,
+                djRoleId: roleId,
+                enabled: roleId !== null
+            },
+            { upsert: true, new: true }
+        );
+        return true;
+    } catch (error) {
+        logger.error(`Error setting DJ role for guild ${guildId}: ${(error as Error).message}`);
+        return false;
+    }
+}
+
+/**
+ * Thêm DJ User vào danh sách
+ */
+export async function addDJUser(guildId: string, userId: string): Promise<boolean> {
+    try {
+        await DJSettings.findOneAndUpdate(
+            { guildId },
+            {
+                guildId,
+                $addToSet: { djUserIds: userId },
+                enabled: true
+            },
+            { upsert: true, new: true }
+        );
+        return true;
+    } catch (error) {
+        logger.error(`Error adding DJ user for guild ${guildId}: ${(error as Error).message}`);
+        return false;
+    }
+}
+
+/**
+ * Xóa DJ User khỏi danh sách
+ */
+export async function removeDJUser(guildId: string, userId: string): Promise<boolean> {
+    try {
+        await DJSettings.findOneAndUpdate(
+            { guildId },
+            { $pull: { djUserIds: userId } }
+        );
+        return true;
+    } catch (error) {
+        logger.error(`Error removing DJ user for guild ${guildId}: ${(error as Error).message}`);
+        return false;
+    }
+}
+
+/**
+ * Kiểm tra user có phải DJ không (theo User ID)
+ */
+export async function isDJUser(guildId: string, userId: string): Promise<boolean> {
+    try {
+        const settings = await DJSettings.findOne({ guildId });
+        if (!settings?.enabled) return false;
+        return settings.djUserIds.includes(userId);
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * Bật/tắt DJ mode
+ */
+export async function setDJEnabled(guildId: string, enabled: boolean): Promise<boolean> {
+    try {
+        await DJSettings.findOneAndUpdate(
+            { guildId },
+            { guildId, enabled },
+            { upsert: true, new: true }
+        );
+        return true;
+    } catch (error) {
+        logger.error(`Error toggling DJ mode for guild ${guildId}: ${(error as Error).message}`);
+        return false;
+    }
+}
+
+/**
+ * Reset DJ settings về mặc định
+ */
+export async function resetDJSettings(guildId: string): Promise<boolean> {
+    try {
+        await DJSettings.findOneAndUpdate(
+            { guildId },
+            {
+                guildId,
+                djRoleId: null,
+                djUserIds: [],
+                enabled: false
+            },
+            { upsert: true, new: true }
+        );
+        return true;
+    } catch (error) {
+        logger.error(`Error resetting DJ settings for guild ${guildId}: ${(error as Error).message}`);
+        return false;
+    }
+}
+

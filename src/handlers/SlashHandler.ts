@@ -5,13 +5,16 @@ import {
     SlashCommandBuilder,
     EmbedBuilder,
     MessageFlags,
-    AutocompleteInteraction
+    AutocompleteInteraction,
+    GuildMember,
+    VoiceBasedChannel
 } from 'discord.js';
 import { createLogger } from '../utils/logger.js';
 import { commands, checkCooldown } from './CommandHandler.js';
-import type { Config, SlashCommandContext, CommandResult } from '../types/index.js';
+import type { Config, SlashCommandContext, CommandResult, BotClient } from '../types/index.js';
 import { COLORS } from '../utils/constants.js';
 import { smartDelete, DeletePresets } from '../utils/messageAutoDelete.js';
+import { checkDJPermission, getNoPermissionMessage, DJ_ACTIONS } from '../utils/permissions.js';
 
 const logger = createLogger('SlashHandler');
 
@@ -138,6 +141,35 @@ export async function handleSlashCommand(
             const embed = new EmbedBuilder()
                 .setDescription('> Đã bảo là vào **Voice** trước đi mà! Không vào sao tớ phát nhạc được!')
                 .setColor(COLORS.ERROR);
+            await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+            return;
+        }
+    }
+
+    // Check DJ permission for music control commands
+    const isDJCommand = DJ_ACTIONS.includes(command.name as any);
+    if (isDJCommand && command.config.category === 'music') {
+        const client = interaction.client as BotClient;
+        const player = client.kazagumo?.players.get(interaction.guildId!);
+        const currentTrack = player?.queue.current;
+        const requester = currentTrack?.requester as any;
+
+        const member = interaction.member as GuildMember;
+        const voiceChannel = member?.voice?.channel as VoiceBasedChannel | null;
+
+        const permResult = await checkDJPermission({
+            member,
+            requester: requester?.id ? requester : null,
+            voiceChannel,
+            ownerId: client.config.app.ownerId
+        });
+
+        if (!permResult.allowed) {
+            const embed = new EmbedBuilder()
+                .setAuthor({ name: 'Hảả?! Bạn không có quyền!' })
+                .setDescription(`> ${getNoPermissionMessage(permResult)}`)
+                .setColor(COLORS.ERROR)
+                .setFooter({ text: 'DJ Role System • Animal Music' });
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             return;
         }

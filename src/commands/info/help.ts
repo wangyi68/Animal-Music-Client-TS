@@ -206,7 +206,6 @@ export function createCategoryEmbed(categories: string[], user: any, prefix: str
 
         if (categoryCommands.length === 0) continue;
 
-        const icon = CATEGORY_ICONS[category] || '•';
         const commandList = categoryCommands.map(cmd => `\`${cmd.name}\``).join(', ');
 
         const fields = categoryCommands.map(cmd => ({

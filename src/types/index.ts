@@ -172,3 +172,14 @@ export interface PrefixDocument {
     guildId: string;
     prefix: string;
 }
+
+// DJ Settings types
+export interface DJSettingsDocument {
+    guildId: string;
+    djRoleId: string | null;
+    djUserIds: string[];
+    enabled: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}
+

@@ -13,10 +13,11 @@ import {
     StringSelectMenuOptionBuilder,
     ButtonBuilder,
     ComponentType,
-    TextChannel
+    TextChannel,
+    GuildMember,
+    VoiceBasedChannel
 } from 'discord.js';
 import { setLoopMode, getLoopMode, setPlayerData, getRandomConnectedNode } from '../services/MusicManager.js';
-import { StateManager, QueueManager } from '../core/index.js';
 import type { BotClient, LoopMode } from '../types/index.js';
 import { COLORS } from '../utils/constants.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
@@ -25,6 +26,7 @@ import {
     MessageType,
     DeletePresets
 } from '../utils/messageAutoDelete.js';
+import { checkDJPermission, getNoPermissionMessage } from '../utils/permissions.js';
 
 
 
@@ -84,19 +86,26 @@ async function handleButton(interaction: ButtonInteraction): Promise<void> {
     // Check if user is the song requester (optional - allow others to control)
     const currentTrack = player.queue.current;
     const requester = currentTrack?.requester as any;
-    const isRequester = !requester || requester?.id === interaction.user.id;
 
-    // For certain actions, check if user is the requester or has permission
-    const restrictedActions = ['stop', 'clear_btn', 'loop', 'shuffle', 'pause_resume', 'skip', 'prev', 'next', 'volume_btn'];
-    if (restrictedActions.includes(customId) && !isRequester) {
-        const member = interaction.member as any;
-        const hasPermission = member?.permissions?.has?.('ManageGuild');
+    // For certain actions, check DJ permission
+    const restrictedActions = ['stop', 'clear_btn', 'loop', 'shuffle', 'pause_resume', 'skip', 'prev', 'next', 'volume_btn', 'clear'];
+    if (restrictedActions.includes(customId)) {
+        const member = interaction.member as GuildMember;
+        const voiceChannel = member?.voice?.channel as VoiceBasedChannel | null;
 
-        if (!hasPermission) {
+        const permResult = await checkDJPermission({
+            member,
+            requester: requester?.id ? requester : null,
+            voiceChannel,
+            ownerId: client.config.app.ownerId
+        });
+
+        if (!permResult.allowed) {
             const errorEmbed = new EmbedBuilder()
-                .setAuthor({ name: 'Hảả?! Mấy cái nút này không phải của bạn!' })
-                .setDescription(`> Bài hát này là yêu cầu của: ${requester?.toString?.() || 'Không rõ'}\n> Đừng có táy máy tay chân!`)
-                .setColor(COLORS.ERROR);
+                .setAuthor({ name: 'Hảả?! Bạn không có quyền!' })
+                .setDescription(`> ${getNoPermissionMessage(permResult)}\n> Bài hát này là yêu cầu của: ${requester?.toString?.() || 'Không rõ'}`)
+                .setColor(COLORS.ERROR)
+                .setFooter({ text: 'DJ Role System • Animal Music' });
             const reply = await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
             smartDelete(reply, DeletePresets.NO_PERMISSION);
             return;

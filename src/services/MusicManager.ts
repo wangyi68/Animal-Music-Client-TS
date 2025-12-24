@@ -12,7 +12,7 @@ import type { Config, LoopMode, PlayerSyncData, LavalinkNodeStatus } from '../ty
 import { AnimalSync } from './AnimalSync.js';
 import { createPlayerControlButtons } from '../utils/buttons.js';
 import { COLORS } from '../utils/constants.js';
-import { StateManager, NodeManager, ErrorHandler, ErrorCode } from '../core/index.js';
+import { StateManager, NodeManager } from '../core/index.js';
 
 const logger = createLogger('MusicManager');
 
@@ -92,15 +92,15 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
 }
 
 // Smart node selection using NodeManager
-export function getRandomConnectedNode(kazagumo: Kazagumo): string | undefined {
+export function getRandomConnectedNode(_kazagumo: Kazagumo): string | undefined {
     return NodeManager.selectBestNode();
 }
 
-export function getConnectedNodeNames(kazagumo: Kazagumo): string[] {
+export function getConnectedNodeNames(_kazagumo: Kazagumo): string[] {
     return NodeManager.getConnectedNodes().map(n => n.name);
 }
 
-export function getLavalinkNodesStatus(kazagumo: Kazagumo): LavalinkNodeStatus[] {
+export function getLavalinkNodesStatus(_kazagumo: Kazagumo): LavalinkNodeStatus[] {
     return NodeManager.getAllNodesHealth().map(h => ({
         name: h.name,
         url: h.url,
@@ -246,7 +246,7 @@ function createCompactEmbed(track: KazagumoTrack, botAvatarUrl?: string, queueSi
             { name: '<:guranote:1444001458600022179> **Hàng chờ**', value: `\`${queueSize || 0} bài\``, inline: true },
             { name: '<a:li:1444329999971651787> **Cluster**', value: `\`${nodeName || 'Unknown'}\``, inline: true }
         )
-        .setFooter({ text: `Animal Music • ${queueInfo}`, iconURL: botAvatarUrl })
+        .setFooter({ text: `Animal Music • ${source} • ${queueInfo}`, iconURL: botAvatarUrl })
         .setTimestamp();
 }
 

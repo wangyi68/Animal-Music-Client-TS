@@ -1,6 +1,6 @@
 /**
  * Core Module Exports
- * @version 3.0.0
+ * @version 3.1.0
  */
 
 export { StateManager, type PlayerState, type GuildSettings } from './StateManager.js';
