@@ -1,0 +1,40 @@
+{
+  "name": "animal-music-client-ts",
+  "version": "3.1.0",
+  "description": "Discord Music Bot - TypeScript with MongoDB",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rmdir /s /q dist && tsc",
+    "start": "rmdir /s /q dist && tsc && node .",
+    "dev": "npx tsx watch src/index.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "discord",
+    "music",
+    "bot",
+    "lavalink",
+    "typescript"
+  ],
+  "author": "WangYi",
+  "license": "MIT",
+  "dependencies": {
+    "@microsoft/signalr": "latest",
+    "discord.js": "latest",
+    "yaml": "latest",
+    "kazagumo": "latest",
+    "kazagumo-spotify": "latest",
+    "moment": "latest",
+    "moment-duration-format": "latest",
+    "mongoose": "latest",
+    "shoukaku": "latest",
+    "table": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

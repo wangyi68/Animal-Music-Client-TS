@@ -1,0 +1,36 @@
+# Animal Music Client Configuration
+# Copy this file to config.yaml and fill in your values
+
+app:
+  token: "YOUR_BOT_TOKEN"
+  prefix: "!"
+  clientId: "YOUR_CLIENT_ID"
+  ownerId: "YOUR_DISCORD_USER_ID"
+
+lavalink:
+  nodes:
+    - name: Primary
+      url: "localhost:2333"
+      auth: "youshallnotpass"
+      secure: false
+    - name: Secondary
+      url: "localhost:2334"
+      auth: "youshallnotpass"
+      secure: false
+
+mongodb:
+  uri: "mongodb://localhost:27017/animal-music"
+
+spotify:
+  clientId: "YOUR_SPOTIFY_CLIENT_ID"
+  clientSecret: "YOUR_SPOTIFY_CLIENT_SECRET"
+
+websocket:
+  url: "https://your-signalr-hub.com/hub"
+  secret: "your-websocket-secret"
+  token: "your-auth-token"
+
+api:
+  enabled: true
+  port: 3002
+  secret: "your-api-secret-key"

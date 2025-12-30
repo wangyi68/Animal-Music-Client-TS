@@ -1,0 +1,73 @@
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { createCommandConfig } from '../../handlers/CommandHandler.js';
+import type { Command, CommandContext, CommandResult, BotClient, SlashCommandContext } from '../../types/index.js';
+import { COLORS } from '../../utils/constants.js';
+import { smartDelete, DeletePresets, MessageType } from '../../utils/messageAutoDelete.js';
+
+const command: Command = {
+    name: 'pause',
+    description: 'Tạm dừng/tiếp tục phát nhạc',
+    aliases: ['resume'],
+    config: createCommandConfig({
+        category: 'music',
+        usage: 'pause',
+        cooldown: 3,
+        voiceChannel: true
+    }),
+
+    slashCommand: new SlashCommandBuilder()
+        .setName('pause')
+        .setDescription('Tạm dừng/tiếp tục phát nhạc') as SlashCommandBuilder,
+
+    async execute(context: CommandContext): Promise<CommandResult> {
+        const { message } = context;
+        const client = message.client as BotClient;
+        return await togglePause(client, message.guild!.id, message);
+    },
+
+    async executeSlash(context: SlashCommandContext): Promise<CommandResult> {
+        const { interaction } = context;
+        const client = interaction.client as BotClient;
+        return await togglePause(client, interaction.guild!.id, null, interaction);
+    }
+};
+
+async function togglePause(
+    client: BotClient,
+    guildId: string,
+    message?: any,
+    interaction?: any
+): Promise<CommandResult> {
+    const player = client.kazagumo.players.get(guildId);
+
+    if (!player) {
+        const errorMsg = 'À mà! Chưa có nhạc nào đâu mà pause với resume!';
+        const embedError = new EmbedBuilder().setDescription(`> ${errorMsg}`).setColor(COLORS.ERROR);
+        if (interaction) {
+            await interaction.reply({ embeds: [embedError], ephemeral: true });
+        } else if (message) {
+            const msg = await message.reply({ embeds: [embedError] });
+            smartDelete(msg, DeletePresets.COMMAND_ERROR);
+        }
+        return { type: 'error', message: errorMsg };
+    }
+
+    const isPaused = player.paused;
+    player.pause(!isPaused);
+
+    const embed = new EmbedBuilder()
+        .setDescription(isPaused ? '> Tiếp tục phát nhạc rồi nè! Đừng bắt tớ dừng lại nữa nha!' : '> Tạm dừng rồi đó! Nhanh quay lại nghe nhạc tiếp nha!')
+        .setColor(COLORS.SUCCESS);
+
+    if (message) {
+        const msg = await message.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 50 });
+    } else if (interaction) {
+        const msg = await interaction.reply({ embeds: [embed] });
+        smartDelete(msg, { type: MessageType.SUCCESS, contentLength: 50 });
+    }
+
+    return { type: 'success' };
+}
+
+export default command;
