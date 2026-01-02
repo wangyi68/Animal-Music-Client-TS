@@ -111,13 +111,9 @@ class NodeManagerClass extends EventEmitter {
             this.recordSuccess(name);
             this.emit('nodeReady', name);
 
-            // Only log first 3 nodes to reduce spam
+            // Log every node connection
             this.nodeReadyCount++;
-            if (this.nodeReadyCount <= 3) {
-                logger.info(`Node '${name}' connected`);
-            } else if (this.nodeReadyCount === 4) {
-                logger.info(`... and more nodes connected (total: ${this.nodeHealth.size})`);
-            }
+            logger.info(`Node '${name}' connected`);
         });
 
         this.kazagumo.shoukaku.on('error', (name: string, error: Error) => {

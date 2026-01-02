@@ -59,7 +59,8 @@ export function createKazagumo(client: Client, config: Config): Kazagumo {
         moveOnDisconnect: true,
         resume: true,
         reconnectTries: 5,
-        restTimeout: 10000
+        restTimeout: 60000,
+        userAgent: 'Animal Music Client/3.1.0'
     });
 
     // Initialize NodeManager with Kazagumo
